@@ -1,1 +1,16 @@
-/venv
+venv/
+__pycache__/
+storage/sessions/*
+*/__pycache__
+storage/cdn/users/*
+storage/cdn/servers/*
+storage/cdn/messages/*
+storage/db/security/*
+storage/db/servers/*
+storage/db/users/*
+storage/db/directmessages/*
+.env
+log.txt
+#deploy
+start.sh
+shell_utils/
