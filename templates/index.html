@@ -5,8 +5,123 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{{ appname }}</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Ubuntu&family=Open+Sans&display=swap");
+
+            * {
+                font-family: 'Ubuntu', sans-serif;
+            }
+
+            body {
+                margin: 0;
+                text-align: center;
+            }
+
+            .banner {
+                background: #f7f797;
+                top: 0px;
+            }
+
+            .banner_content {
+                max-width: 43.04%;
+                padding: 16px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                color: #000000;
+            }
+
+            #login {
+                position: relative;
+            }
+
+            #login button {
+                position: absolute;
+                top: 2px;
+                right: 30px;
+                height: 30px;
+                width: 60px;
+                border: 0px;
+                border-radius: 25px;
+                padding: 0px;
+            }
+
+            #head {
+                top: 60px;
+                font-size: 20px;
+                text-decoration: underline 3px dotted lightblue;
+            }
+
+            button#signup {
+                background-color: blue;
+                color: white;
+                font-size: 32px;
+                cursor: pointer;
+                width: 7em;
+                height: 2.5em;
+                border-radius: 25px;
+            }
+
+            @media (prefers-color-scheme: light) {
+                * {
+                    color: black;
+                }
+
+                #login button {
+                    background-color: #9e9e9e;
+                }
+            }
+            @media (prefers-color-scheme: dark) {
+                * {
+                    color: white;
+                }
+                body {
+                    background-color: #343434;
+                }
+
+                #login button {
+                    color: black;
+                }
+
+                input#prefillname {
+                    color: black;
+                }
+            }
+        </style>
     </head>
     <body>
-        
+        {%if pending%}
+		<div class='banner'>
+			<div class = 'banner_content'>
+				Your account needs to be verified. Please check your email and spam folders.
+			</div>
+		</div>
+		{%endif%}
+        <noscript><div style='position: fixed; overflow: none; width: 100vw; height: 100vh; background-color: white; z-index: 1000; top: 0;'><h1 style="color: orange;">This site requires JavaScript to function. Please enable it.</h1></div></noscript>
+		<div id='login'>
+			<button>------</button>
+		</div>
+		<div id="head">
+			<h1>Twilight</h1>
+		</div>
+        <br>
+        <input type="text" id="prefillname" placeholder="Your Username Here" style="font-size: 20px; height: 2.5em; width: 10em;">
+		<button id="signup" onclick="location='/account/signup?prefilled='+document.getElementById('prefillname').value">Sign Up</button>
+        <footer style="color:white; font-size:10px; bottom:0px; position: absolute;">{{ version }}</footer>
+        <script defer>
+            function check() {
+                var button = document.querySelector('#login button')
+                if (Object.fromEntries(new URLSearchParams(document.cookie.replace(/; /g, "&"))).hasOwnProperty('authtoken')) {
+                    button.innerText = "Account"
+                    button.onclick = () => {location = '/me/'}
+                } else {
+                    button.innerText = "Login"
+                    button.onclick = () => {location = '/account/login'}
+                }
+                button.style.cursor = 'pointer'
+            }
+            check()
+            navigator.serviceWorker.register('/static/cache.js', {"scope": "/"})
+        </script>
     </body>
 </html>
