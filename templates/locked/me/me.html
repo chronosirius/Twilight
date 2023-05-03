@@ -1,0 +1,46 @@
+{% extends "locked/base.html" %}
+
+{% block title %}Me{% endblock %}
+
+{% block styles %}
+<style>
+div#topbar a#newfriend {
+    color: green;
+    text-decoration: none;
+    left: 80%;
+    padding: 0.1%;
+    position: absolute;
+    top: 15%;
+}
+a#newfriend:hover {
+    color:black !important;
+    background: green;
+    border-radius: 7px;
+}
+div#topbar a#pendingfriends {
+    color: var(--disc-color);
+    text-decoration: none;
+    left: 70%;
+    padding: 0.1%;
+    position: absolute;
+    top: 15%;
+}
+
+a#pendingfriends:hover {
+    color: var(--text-color) !important;
+    background: var(--background-color);
+    border-radius: 7px;
+}
+</style>
+{% endblock %}
+
+{% block topbar %}<a href="/me/friends/new" id="newfriend">HELLO</a>{% endblock %}
+
+{% block content %}
+<div id="friendslist">{% if friends|length > 0 %}{% for friend in friends %}
+                <div id="{{ friend['id'] }}" class="friend">
+                    <div style="overflow: auto; display: flex; align-items: center;"><img src="{{ friend['pfp_url'] }}" style='border-radius: 50%; float: left; padding: 2%; width: 10%; vertical-align:middle;'><div><span purp="friendusername">{{ friend['username'] }}</span>#<span purp="frienddiscriminator">{{ friend['discriminator'] }}</span><br><br><span purp="status">{{ friend['status'] }}</span></div><button class='friend-message-button' onclick='window.location = "{{ url_for('me.dm', reciever=friend['id']) }}"'>Message</button></div>
+                </div>{% endfor %}{% else %}
+                <p style="text-align: center;">You have no friends! <a href="/me/friends/new" style="color: var(--makefriend-color); text-decoration:none;">Go make some!</a></p>{% endif %}
+            </div>
+{% endblock %}

@@ -1,0 +1,104 @@
+
+<html translate="no">
+	<head>
+		<title>Signup | Twilight</title>
+		<style>
+		    @import url('https://fonts.googleapis.com/css2?family=Ubuntu&family=Open+Sans&display=swap');
+
+            * {
+                font-family: 'Ubuntu', sans-serif;
+            }
+
+            body {
+                margin: 0;
+                background: #343434;
+                color: #ffffff;
+                text-align: center;
+                padding: 10px;
+            }
+
+            .inputlabel {
+                padding: 0px;
+                align-items: center;
+            }
+
+            label { display: inline-block; width: 90px; text-align: right; }
+
+            button#signup {
+                color: white;
+                background: blue;
+                height: 5%;
+                cursor: pointer;
+            }
+
+            button#signup:hover {
+                border: 2px white;
+            }
+
+            a { display: inline-block; width: 260px; text-align: right; font-size: 10px; color:white; padding: 7px;}
+            a:visited {color: white;}
+            a:hover {color: #34bcc7;}
+            @media (prefers-color-scheme: light) {
+                * {
+                    color: black;
+                }
+
+                body {
+                    background-color: #b5b5b5;
+                }
+                a { display: inline-block; width: 260px; text-align: right; font-size: 10px; color: black; padding: 7px;}
+			    a:visited {color: black;}
+			    a:hover {color: #23878e;}
+            }
+            @media (prefers-color-scheme: dark) {
+                * {
+                    color: white;
+                }
+                body {
+                    background-color: #343434;
+                }
+
+                #login button {
+                    color: black;
+                }
+
+                input#prefillname {
+                    color: black;
+                }
+                a { display: inline-block; width: 260px; text-align: right; font-size: 10px; color: white; padding: 7px;}
+			    a:visited {color: white;}
+			    a:hover {color: #34bcc7;}
+            }
+        </style>
+	</head>
+	<body>
+		<h1>Sign Up</h1>
+		<form action="{{ url_for('userauth.signup') }}" method="post">
+			<div class="inputlabel">
+				<label for="email">Email: </label>
+				<input type='email' name='username' id="email" required>
+			</div>
+			<br>
+            <div class="inputlabel">
+                <label for="username">Username: </label>
+                <input type="text" name="display_username" id="username">
+            </div>
+            <br>
+			<div class="inputlabel">
+				<label for="password">Password: </label>
+				<input type='password' name='password' id="password" required>
+                <br><p style="font-size: 9px; color: red;">Your password will be stripped of spaces on each side!</p>
+			</div>
+			<a href="/account/login">I have an account</a>
+			<br>
+			<button id="signup" type="submit">Sign Up</button>
+		</form>
+		<div id="info">{% with messages = get_flashed_messages() %}{{ messages[0] }}{% endwith %}</div>
+        <script defer>
+            s = new URLSearchParams(location.search)
+            if (s.get('prefilled')) {
+                document.getElementById('username').value = s.get('prefilled')
+            }
+        </script>
+	</body>
+</html>

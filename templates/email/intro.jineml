@@ -1,0 +1,19 @@
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td>
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td>
+                        Welcome to Twilight! To finish registration, click the button below:<br>
+                        <a href="{{ url_for('userauth.signup_finish', token=token, _external=True) }}" target="_blank" style="font-size:16px;font-family:sans-serif; text-decoration:none; background-color: #28d3f3; border-right: 10px solid #28d3f3; border-left: 10px solid #28d3f3; display: inline-block; border-radius:30px;">
+                            <p style="font-size:16px;font-family:sans-serif;color:#ffffff;text-decoration:none;">
+                                Finish Registration
+                            </p>
+                        </a>
+                        <p style='font-size:10px;'>Or, copy and paste this url: {{ url_for('userauth.signup_finish', token=token, _external=True) }}</p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

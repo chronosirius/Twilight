@@ -50,11 +50,11 @@ async function fastget({req}) {
                 })
             }
         }
-        if (new URL(req.url).pathname.startsWith('/cdn/') || new URL(req.url).pathname.startsWith('/static/')) {
+        if (new URL(req.url).pathname.startsWith('/cdn/') || new URL(req.url).pathname.startsWith('/static/') && new URL(req.url).pathname != "/static/cache.js") {
             cache = await self.caches.open('cdn_cache')
             cache.put(req, network_res.clone())
             console.log(`Cached from CDN (${req.url}).`)
-        } else if (new URL(req.url).hostname == 'fonts.gstatic.com') {
+        } else if (new URL(req.url).hostname == 'fonts.gstatic.com' || new URL(req.url).hostname == 'fonts.googleapis.com') {
             cache = await self.caches.open('cdn_cache')
             cache.put(req, network_res.clone())
             console.log(`Cached from font-store (${req.url}).`)

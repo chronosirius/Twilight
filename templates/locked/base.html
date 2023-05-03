@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html translate="no">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mousetrap/1.6.5/mousetrap.min.js" integrity="sha512-+Jg3Ynmj9hse704K48H6rBBI3jdNBjReRGBCxUWFfOz3yVurnJFWtAWssDAsGtzWYw89xFWPxShuj2T6E9EOpg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="/static/ctxmenu.js"></script>
+        <title>{% block title %}{% endblock %} | {{ appname }}</title>
+        <style>
+            /* basic styles that will show up everywhere */
+            @import url("https://fonts.googleapis.com/css2?family=Ubuntu&family=Open+Sans&display=swap");
+
+            * {
+                font-family: 'Ubuntu', sans-serif;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --spec-el-color: #232323;
+                    --background-color: #454545;
+                    --tlv-el-color: #343434;
+                    --thlv-el-color: #404040;
+                    --disc-color: #666666;
+                    --text-color: white;
+                    --invert-color: white;
+                    --invert-text-color: black;
+                    --makefriend-color: yellow;
+                }
+            }
+
+            @media (prefers-color-scheme: light) {
+                :root {
+                    --spec-el-color: #bfbfbf;
+                    --background-color: #ffffff;
+                    --tlv-el-color: #cbcbcb;
+                    --thlv-el-color: #dcdcdc;
+                    --disc-color: #777777;
+                    --text-color: black;
+                    --invert-color: black;
+                    --invert-text-color: white;
+                    --makefriend-color: red;
+                }
+            }
+
+
+            body {
+                padding: 0px;
+                margin: 0px;
+                border: 0px;
+                background-color: var(--background-color);
+            }
+
+            div#sidebar {
+                background: var(--spec-el-color);
+                position: fixed;
+                height: 100%;
+                top: 0px;
+                left: 0px;
+                overflow-y: scroll;
+                width: 85px;
+            }
+
+            div#sidebar::-webkit-scrollbar {
+                display: none;
+            }
+
+            div#topbar {
+                background-color: var(--tlv-el-color);
+                width: calc(100% - 85px);
+                height: 6vh;
+                position: relative;
+                top: 0px;
+                left: 85px;
+                text-align: right;
+            }
+
+            div#subbody {
+                position: relative;
+                left: 85px;
+                width: calc(100% - 85px);
+                height: 94vh;
+            }
+
+            div#sidebar-pdm {
+                background-color: var(--thlv-el-color);
+                position: relative;
+                top: 0px;
+                left: 0px;
+                height: 100%;
+                width: 20%;
+            }
+
+            div#myinfo {
+                text-align: left;
+                color: var(--text-color);
+                text-overflow: ellipsis;
+                width: 100%;
+                background-color: var(--tlv-el-color);
+                position: absolute;
+                bottom: 0px;
+                height: 10%;
+                display: block;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            span[purp=username] {
+                margin-left: 3%;
+            }
+
+            span[purp=discriminator] {
+                color: var(--disc-color);
+                font-size: 15px;
+                margin-left: 3%;
+            }
+
+            span[purp=settingsicon] {
+                position: absolute;
+                right: 0px;
+                padding: 5%;
+                padding-top: 1%;
+                color: var(--text-color);
+            }
+
+            div#subsubbody {
+                position: absolute;
+                left: 20%;
+                height: 100%;
+                top: 0%;
+                width: 80%;
+                color: var(--text-color);
+                overflow-y: auto;
+            }
+        </style>
+        {% block styles %}{% endblock %}
+        {% block headscripts %}{% endblock %}
+    </head>
+    <body>
+        <noscript><div style='position: fixed; overflow: none; width: 100vw; height: 100vh; background-color: white; z-index: 1000; top: 0;'><h1 style="color: orange;">This site requires JavaScript to function. Please enable it.</h1></div></noscript>
+        <script async>
+            token = Object.fromEntries(new URLSearchParams(document.cookie.replace(/; /g, "&")))['authtoken']
+            form = new FormData()
+            form.append('token', token)
+            prefstat = localStorage.getItem('prefstat')
+            
+            if (prefstat == null) {
+                form.append('status', 'online')
+            } else {
+                form.append('status', prefstat)
+            }
+
+            fetch("/", {
+                method: 'POST',
+                body: form
+            }).then(function(res) {
+                return res.json()
+            }).then(function(json) {
+                if (json['error'] == null) {
+                    console.log('Update successful!')
+                } else {
+                    location.reload()
+                }
+            })
+            
+            window.addEventListener('beforeunload', function() {
+                fd = new FormData()
+                fd.append('token', token)
+                fd.append('status', 'offline')
+                navigator.sendBeacon("/", fd)
+            })
+        </script>
+        <script defer>
+            history.replaceState({
+                prev_url: window.location.href
+            }, "")
+            Array.from(document.getElementsByTagName('a')).forEach(function(el) {
+                el.addEventListener('click', function(ev) {
+                    ev.preventDefault()
+                    fetch(el.getAttribute('href')).then(function(res) {
+                        return res.text()
+                    }).then(function(text) {
+                            history.pushState({
+                                prev_url: window.location.href
+                            }, "", el.getAttribute('href'))
+                            document.open()
+                            document.write(text)
+                            document.close()
+                            if (updater == null) {
+                                clearInterval(updater)
+                            }
+                        })
+                    })
+                })
+
+            window.addEventListener('popstate', function(ev) {
+                console.log(ev.state)
+                document.dispatchEvent('leave')
+                if (ev.state) {
+                    fetch(ev.state.prev_url).then(function(res) {
+                        return res.text()
+                    }).then(function(text) {
+                        history.pushState({
+                            prev_url: window.location.href
+                        }, "", ev.state.prev_url)
+                        
+                        document.open()
+                        document.write(text)
+                        document.close()
+                    })
+                }
+            })
+        </script>
+        <script>
+            function new_server_modal() {
+                if (document.getElementById('new_server_modal') == null) {
+                    modal = document.createElement('div')
+                    modal.setAttribute('id', 'new_server_modal')
+                    modal.style.position = 'absolute'
+                    modal.style.width = '33%'
+                    modal.style.left = '33%'
+                    modal.style.height = '70%'
+                    modal.style.top = '15%'
+                    modal.style.color = 'var(--invert-text-color)'
+                    modal.style.backgroundColor = 'var(--invert-color)'
+                    modal.style.textAlign = 'center'
+
+                    head = document.createElement('h1')
+                    head.innerHTML = 'Create a server'
+                    modal.appendChild(head)
+
+                    form = document.createElement('form')
+
+                    hiddenid = document.createElement('input')
+                    hiddenid.setAttribute('name', 'token')
+                    hiddenid.setAttribute('type', 'hidden')
+                    hiddenid.setAttribute('value', token)
+                    form.appendChild(hiddenid)
+
+                    namel = document.createElement('input')
+                    namel.setAttribute('type', 'text')
+                    namel.setAttribute('required', 'true')
+                    namel.setAttribute('placeholder', 'server name')
+                    namel.setAttribute('name', 'servername')
+                    namel.setAttribute('autocomplete', 'off')
+                    form.appendChild(namel)
+
+                    form.appendChild(document.createElement('br'))
+                    form.appendChild(document.createElement('br'))
+
+                    file = document.createElement('input')
+                    file.setAttribute('type', 'file')
+                    file.setAttribute('accept', 'image/png, image/jpeg, image/gif')
+                    file.setAttribute('name', 'icon')
+                    file.style.width = 'min-content'
+
+                    e = document.createElement('div')
+                    e.style.marginLeft = '16.5%'
+                    e.appendChild(file)
+
+                    sub = document.createElement('input')
+                    sub.setAttribute('type', 'submit')
+
+                    form.appendChild(e)
+                    form.appendChild(document.createElement('br'))
+                    form.appendChild(sub)
+
+                    form.setAttribute('method', 'POST')
+                    form.setAttribute('action', '/')
+                    form.setAttribute('enctype', 'multipart/form-data')
+
+                    modal.appendChild(form)
+
+                    closebtn = document.createElement('button')
+                    closebtn.onclick = function() {
+                        document.getElementById('new_server_modal').remove()
+                    }
+                    closebtn.style.position = 'absolute'
+                    closebtn.style.right = '0'
+                    closebtn.style.top = '0'
+                    closebtn.innerHTML = 'X'
+
+                    errordiv = document.createElement('div')
+                    errordiv.setAttribute('id', 'new_server_modal_errordiv')
+
+                    modal.appendChild(closebtn)
+                    modal.appendChild(errordiv)
+
+                    document.body.appendChild(modal)
+                }
+            }
+
+            document.getElementById('mypfp').addEventListener('click', function(ev) {
+                modal = document.createElement('div')
+                modal.setAttribute('id', 'status_modal')
+                modal.style.position = 'absolute'
+                modal.style.width = '33%'
+                modal.style.left = '33%'
+                modal.style.height = '70%'
+                modal.style.top = '15%'
+                modal.style.color = 'var(--invert-text-color)'
+                modal.style.backgroundColor = 'var(--invert-color)'
+                modal.style.textAlign = 'center'
+
+                head = document.createElement('h1')
+                head.innerHTML = 'Set your status'
+                modal.appendChild(head)
+
+                status_inp = document.createElement('input')
+                status_inp.setAttribute('type', 'text')
+                status_inp.setAttribute('required', 'true')
+                status_inp.setAttribute('placeholder', 'status')
+                status_inp.setAttribute('name', 'servername')
+                status_inp.setAttribute('autocomplete', 'off')
+                status_inp.setAttribute('id', 'status')
+                modal.appendChild(status_inp)
+
+                modal.appendChild(document.createElement('br'))
+                modal.appendChild(document.createElement('br'))
+
+                sub = document.createElement('button')
+                sub.onclick = function() {
+                    stat = document.getElementById('status').value 
+                    if (stat != '') {
+                        localStorage.setItem('prefstat', stat)
+                        form = new FormData()
+                        form.append('token', token)
+                        form.append('status', stat)
+                        fetch('/', {
+                            method: 'POST',
+                            body: form
+                        })
+                        document.getElementById('status_modal').remove()
+                        alert('Done!')
+                    } else {
+                        alert('Please fill out all fields.')
+                    }
+                }
+                sub.innerHTML = 'Change Status'
+                modal.appendChild(sub)
+
+                reset = document.createElement('button')
+                reset.onclick = function() {
+                    localStorage.removeItem('prefstat')
+                    alert('Reset successful.')
+                    form = new FormData()
+                    form.append('token', token)
+                    form.append('status', 'online')
+                    fetch('/', {
+                        method: 'POST',
+                        body: form
+                    })
+                    document.getElementById('status_modal').remove()
+                }
+                reset.innerHTML = 'Reset status'
+                modal.appendChild(reset)
+
+                closebtn = document.createElement('button')
+                closebtn.onclick = function() {
+                    document.getElementById('status_modal').remove()
+                }
+                closebtn.style.position = 'absolute'
+                closebtn.style.right = '0'
+                closebtn.style.top = '0'
+                closebtn.innerHTML = 'X'
+                modal.appendChild(closebtn)
+
+                document.body.appendChild(modal)
+            })
+        </script>
+        <div id="sidebar">
+            <a href="/me/">
+                <img src="/favicon.ico" width="80%" style="display: block; margin-left: auto; margin-right: auto; border-radius: 25%; padding-top: 10%">
+            </a>{% for server in servers %}
+            <br>
+            <a href="{{ server['link'] }}" class="server-sidebar-icon" id="{{ server['id'] }}" server="{{ server['id'] }}">
+                <div style="display:block; margin-left:auto;margin-right:auto;">
+                    <img src="{{ server['icon'] }}" width="80%" style="object-position: center; object-fit: cover; border-radius: 25%; margin-left:auto;margin-right:auto;display:block;" server="{{ server['id'] }}">
+                </div>
+            </a>{% endfor %}
+            <br>
+            <button onclick="new_server_modal()" style="display: block; margin-left: auto; margin-right: auto; border-radius: 25%; width: 80%; height: 10%; font-size: 200%; background: #28d3f3; cursor: pointer;" onmouseover="this.style.background='#72d3f3'" onmouseleave="this.style.background='#28d3f3'">&#43</button>
+        </div>
+        <div id="topbar">{% block topbar %}{% endblock %}</div>
+        <div id="subbody">
+            <div id="sidebar-pdm">
+                {% block sidebar %}{% endblock %}
+                <div id="myinfo">
+                    <div style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                        <img src="{{ user['pfp_url'] }}" style="width: 12%; border-radius: 5px; vertical-align: middle;" id="mypfp">
+                        <span purp="username">{{ user['username'] }}</span><br>
+                    </div>
+                    <span purp="discriminator">#{{ user['discriminator'] }}</span>
+                    <a href="/"><span purp="settingsicon">&#9881</span></a>
+                </div>
+            </div>
+            <div id="subsubbody">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </body>
+</html>

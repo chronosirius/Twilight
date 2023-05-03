@@ -4,7 +4,7 @@ from traceback import format_exc
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, Blueprint, redirect, request, send_from_directory, render_template, url_for
+from flask import Flask, Blueprint, redirect, request, send_from_directory, render_template, url_for, g
 from werkzeug.exceptions import NotFound, HTTPException
 
 from datetime import datetime as dt, timedelta as td
@@ -18,6 +18,7 @@ servers = Database('storage/db/servers/')
 users = Database('storage/db/users/')
 security = Database('storage/db/security/')
 dms = Database('storage/db/directmessages/')
+security = Database('storage/db/security/')
 
 consolecode = generate_token()[0:15]
 
@@ -29,9 +30,11 @@ app.config['SESSION_FILE_DIR'] = 'storage/sessions/'
 app.config['SESSION_PERMANENT'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = td(days=30)
 
-from account import account_bp_views
-
-app.register_blueprint(account_bp_views)
+@app.before_request
+def before():
+    r = request.headers.get('X-Forwarded-For')
+    g.remote_addr = r or request.remote_addr
+    print(g.remote_addr, request.full_path, request.method)
 
 @app.route('/')
 def index():
@@ -45,14 +48,25 @@ def favicon():
 def not_found(err: NotFound):
     return render_template('err/404.html', error_path=request.path), 404
 
+@app.route('/static/push_mention.js')
+def sw_push():
+    r = send_from_directory('static', 'push_mention.js')
+    r.headers.add_header('Service-Worker-Allowed', "/")
+    return r
+    
+@app.route('/static/cache.js')
+def sw_cache():
+    r = send_from_directory('static', 'cache.js')
+    r.headers.add_header('Service-Worker-Allowed', "/")
+    return r
+
 @app.errorhandler(Exception)
 def internal_error(err):
-    if not isinstance(err, JSONDecodeError):
-        if not isinstance(err, HTTPException):
-            erre = format_exc()
-            ee = erre.replace('\n', '<br>\n')
-            with open('log.txt', 'a') as log:
-                    logstr = \
+    if not isinstance(err, HTTPException):
+        erre = format_exc()
+        ee = erre.replace('\n', '<br>\n')
+        with open('log.txt', 'a') as log:
+                logstr = \
     f"""
     <code>
         Exception occured at <i>{dt.utcnow().strftime('%m/%d/%y %H:%M:%S')}</i>:<br>
@@ -64,11 +78,11 @@ def internal_error(err):
     <br>
     <br>
     """
-                    log.write(logstr)
-            if __name__ == '__main__':
-                raise err
+                log.write(logstr)
+        if app.debug:
+            raise err
         return render_template('err/500.html', err=err), 500
-    return redirect(request.full_path.rstrip('?'))
+    return err
 
 @app.context_processor
 def base_template_ctx():
@@ -80,8 +94,20 @@ def base_template_ctx():
         appname='Twilight'
     )
 
+def load():
+    from account import account_bp_views
+    from userauth import userauth_bp_proc
+    from locked import locked_bp
+    from cdn import cdn
+
+    app.register_blueprint(account_bp_views)
+    app.register_blueprint(userauth_bp_proc)
+    app.register_blueprint(locked_bp)
+    app.register_blueprint(cdn)
+
 from websocket import wss
 def run():
+    load()
     wss.init_app(app)
     wss.run(app, '0.0.0.0', port=int(env['PORT']), debug=True)
 
