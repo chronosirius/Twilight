@@ -34,7 +34,10 @@ a#pendingfriends:hover {
 </style>
 {% endblock %}
 
-{% block topbar %}<a href="/me/friends/new" id="newfriend">HELLO</a>{% endblock %}
+{% block topbar %}
+<a href="/me/friends/new" id="newfriend">Add Friend</a>
+<a href="/me/friends/pending" id="pendingfriends">Pending</a>
+{% endblock %}
 
 {% block content %}
 <div id="friendslist">{% if friends|length > 0 %}{% for friend in friends %}

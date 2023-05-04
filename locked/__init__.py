@@ -7,7 +7,7 @@ locked_bp = Blueprint('locked', __name__.split('.')[0], template_folder='templat
 
 @locked_bp.before_request
 def check_authorization():
-    t = request.cookies.get('authtoken', '').strip(' ') #type: ignore
+    t = request.cookies.get('authtoken', request.args.get('authtoken', request.form.get('authtoken', ''))).strip(' ') #type: ignore
     if t == '':
         flash('Invalid authtoken!')
         return redirect(url_for('accounts.login'))

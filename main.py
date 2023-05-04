@@ -32,9 +32,10 @@ app.config['PERMANENT_SESSION_LIFETIME'] = td(days=30)
 
 @app.before_request
 def before():
-    r = request.headers.get('X-Forwarded-For')
+    r = str(request.headers.get('X-Forwarded-For', ''))
     g.remote_addr = r or request.remote_addr
-    print(g.remote_addr, request.full_path, request.method)
+    if r != '':
+        request.remote_addr = r
 
 @app.route('/')
 def index():

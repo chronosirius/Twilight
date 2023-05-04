@@ -151,7 +151,7 @@
                 form.append('status', prefstat)
             }
 
-            fetch("/", {
+            fetch("{{ url_for('locked.me.update_status') }}", {
                 method: 'POST',
                 body: form
             }).then(function(res) {
@@ -168,7 +168,7 @@
                 fd = new FormData()
                 fd.append('token', token)
                 fd.append('status', 'offline')
-                navigator.sendBeacon("/", fd)
+                navigator.sendBeacon("{{ url_for('locked.me.update_status') }}", fd)
             })
         </script>
         <script defer>
@@ -291,7 +291,7 @@
                 }
             }
 
-            document.getElementById('mypfp').addEventListener('click', function(ev) {
+            function update_status() {
                 modal = document.createElement('div')
                 modal.setAttribute('id', 'status_modal')
                 modal.style.position = 'absolute'
@@ -327,7 +327,7 @@
                         form = new FormData()
                         form.append('token', token)
                         form.append('status', stat)
-                        fetch('/', {
+                        fetch('{{ url_for("locked.me.update_status") }}', {
                             method: 'POST',
                             body: form
                         })
@@ -347,7 +347,7 @@
                     form = new FormData()
                     form.append('token', token)
                     form.append('status', 'online')
-                    fetch('/', {
+                    fetch('{{ url_for("locked.me.update_status") }}', {
                         method: 'POST',
                         body: form
                     })
@@ -359,15 +359,16 @@
                 closebtn = document.createElement('button')
                 closebtn.onclick = function() {
                     document.getElementById('status_modal').remove()
+                    document.body.style.opacity='100%'
                 }
                 closebtn.style.position = 'absolute'
                 closebtn.style.right = '0'
                 closebtn.style.top = '0'
                 closebtn.innerHTML = 'X'
                 modal.appendChild(closebtn)
-
+                document.body.style = 'filter: brightness(50%)'
                 document.body.appendChild(modal)
-            })
+            }
         </script>
         <div id="sidebar">
             <a href="/me/">
@@ -388,7 +389,7 @@
                 {% block sidebar %}{% endblock %}
                 <div id="myinfo">
                     <div style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                        <img src="{{ user['pfp_url'] }}" style="width: 12%; border-radius: 5px; vertical-align: middle;" id="mypfp">
+                        <img src="{{ user['pfp_url'] }}" style="width: 12%; border-radius: 5px; vertical-align: middle;" id="mypfp" onclick="update_status()">
                         <span purp="username">{{ user['username'] }}</span><br>
                     </div>
                     <span purp="discriminator">#{{ user['discriminator'] }}</span>
