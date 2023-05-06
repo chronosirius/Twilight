@@ -1,4 +1,5 @@
 from flask import Blueprint, g, render_template as rt, request
+from main import users
 
 me_bp = Blueprint('me', __name__.split('.')[0], url_prefix='/me/', template_folder="../templates/locked/me/")
 
@@ -19,3 +20,11 @@ def update_status():
             'code': 400,
             'message': 'A field value was missing. ("status")'
         }, 400
+
+@me_bp.route('/friends/new')
+def friend_new():
+  return rt('friends/new.html')
+
+@me_bp.route('/friends/pending')
+def friends_pending():
+  return rt('friends/pending.html', incoming=[users[uid] for uid in g.user['friend_requests']['incoming']], outgoing=[users[uid] for uid in g.user['friend_requests']['outgoing']])

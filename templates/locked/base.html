@@ -38,8 +38,8 @@
                     --thlv-el-color: #dcdcdc;
                     --disc-color: #777777;
                     --text-color: black;
-                    --invert-color: black;
-                    --invert-text-color: white;
+                    --invert-color: white;
+                    --invert-text-color: black;
                     --makefriend-color: red;
                 }
             }
@@ -74,6 +74,10 @@
                 top: 0px;
                 left: 85px;
                 text-align: right;
+                box-shadow: 0px 0px 20px rgba(0,0,0,0.40);
+                clip-path: inset(0px 0px -3px 0px);
+                z-index: 10;
+                border-bottom: black 1px;
             }
 
             div#subbody {
@@ -138,8 +142,18 @@
         {% block headscripts %}{% endblock %}
     </head>
     <body>
-        <noscript><div style='position: fixed; overflow: none; width: 100vw; height: 100vh; background-color: white; z-index: 1000; top: 0;'><h1 style="color: orange;">This site requires JavaScript to function. Please enable it.</h1></div></noscript>
+        <noscript><div style='position: fixed; overflow: none; width: 100vw; height: 100vh; background-color: white; z-index: 1000; top: 0; text-align: center;'><h1 style="color: orange;">This site requires JavaScript to function. Please enable it.</h1></div></noscript>
         <script async>
+            const BACKDROP = document.createElement('div')
+            BACKDROP.style.position = 'fixed'
+            BACKDROP.style.width = '100vw'
+            BACKDROP.style.height = '100vh'
+            BACKDROP.style.backgroundColor = 'black'
+            BACKDROP.style.opacity = '0.85'
+            BACKDROP.id = '___backdrop'
+            BACKDROP.style.zIndex = '1000'
+            BACKDROP.style.top = '0'
+            BACKDROP.style.left = '0'
             token = Object.fromEntries(new URLSearchParams(document.cookie.replace(/; /g, "&")))['authtoken']
             form = new FormData()
             form.append('token', token)
@@ -275,6 +289,7 @@
                     closebtn = document.createElement('button')
                     closebtn.onclick = function() {
                         document.getElementById('new_server_modal').remove()
+                        document.getElementById('___backdrop').remove()
                     }
                     closebtn.style.position = 'absolute'
                     closebtn.style.right = '0'
@@ -286,7 +301,9 @@
 
                     modal.appendChild(closebtn)
                     modal.appendChild(errordiv)
+                    modal.style.zIndex = '1001'
 
+                    document.body.appendChild(BACKDROP.cloneNode(true))
                     document.body.appendChild(modal)
                 }
             }
@@ -359,14 +376,15 @@
                 closebtn = document.createElement('button')
                 closebtn.onclick = function() {
                     document.getElementById('status_modal').remove()
-                    document.body.style.opacity='100%'
+                    document.getElementById('___backdrop').remove()
                 }
                 closebtn.style.position = 'absolute'
                 closebtn.style.right = '0'
                 closebtn.style.top = '0'
                 closebtn.innerHTML = 'X'
                 modal.appendChild(closebtn)
-                document.body.style = 'filter: brightness(50%)'
+                modal.style.zIndex = '1001'
+                document.body.appendChild(BACKDROP.cloneNode(true))
                 document.body.appendChild(modal)
             }
         </script>

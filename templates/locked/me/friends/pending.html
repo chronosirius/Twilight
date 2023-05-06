@@ -1,0 +1,194 @@
+{% extends "locked/me/me_base.html" %}
+
+{% block title %}Pending Friends{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+<style>
+    div#incoming {
+        width: 50%;
+        text-align: center;
+        border-right: 2px solid red;
+        height: 100%;
+    }
+
+    div#incoming::-webkit-scrollbar {
+        display: none;
+    }
+
+    div#incoming h1 {
+        margin-top: 0px;
+    }
+
+    div.incoming-request img {
+        border-radius: 50%;
+        height: 50%;
+    }
+
+    div#outgoing {
+        width: 50%;
+        text-align: center;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+
+    div#outgoing::-webkit-scrollbar {
+        display: none;
+    }
+
+    div#outgoing h1 {
+        margin-top: 0px;
+    }
+
+    div.outgoing-request img {
+        border-radius: 50%;
+        height: 50%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="incoming">
+    <h1>Incoming</h1>
+    {% if incoming|length > 0 %}
+    {% for friend in incoming %}
+    <div style="overflow: auto; display: flex; align-items: center; text-align: left !important; position: relative;" id="{{ friend['id'] }}" class="incoming-request">
+        <img src="{{ friend['pfp_url'] }}" style='border-radius: 50%; float: left; padding: 2%; width: 16%; vertical-align:middle;'>
+        <div>
+            <span purp="friendusername">{{ friend['username'] }}</span>#<span purp="frienddiscriminator">{{ friend['discriminator'] }}</span>
+            <br>
+            <span purp="status">{{ friend['status'] }}</span>
+            <button onclick="accept(this)" style="position: absolute; right:0; top:10%;">&check;</button>
+            <button onclick="reject(this)" style="position: absolute; right:0; bottom:10%;">X</button>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>You have no incoming friend requests.</p>
+    {% endif %}
+</div>
+<div id="outgoing">
+    <h1>Outgoing</h1>
+    {% if outgoing|length > 0 %}
+    {% for friend in outgoing %}
+    <div style="overflow: auto; display: flex; align-items: center; text-align: left !important; position: relative;" id="{{ friend['id'] }}" class="outgoing-request">
+        <img src="{{ friend['pfp_url'] }}" style='border-radius: 50%; float: left; padding: 2%; width: 16%; vertical-align:middle;'>
+        <div>
+            <span purp="friendusername">{{ friend['username'] }}</span>#<span purp="frienddiscriminator">{{ friend['discriminator'] }}</span>
+            <br>
+            <span purp="status">{{ friend['status'] }}</span>
+            <button onclick="cancel(this)" style="position: absolute; right:0; bottom:10%;">X</button>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>You have no outgoing friend requests.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    updater = setInterval(function() {
+        fetch(`{{ url_for('locked.me.self_as_json') }}?token=${token}`).then(function(res) {
+            return res.json()
+        }).then(function(json) {
+            if (json['error'] == null) {
+                console.log(json)
+                Array.from(document.getElementsByClassName('incoming-request')).forEach(function(el, index) {
+                    if (json['friend_requests']['incoming'][el.id] != null) {
+                        document.querySelector(`div#${el.id}.incoming-request span[purp=friendusername]`).innerHTML = json['friend_requests']['incoming'][el.id]['username']
+                        document.querySelector(`div#${el.id}.incoming-request span[purp=frienddiscriminator]`).innerHTML = json['friend_requests']['incoming'][el.id]['discriminator']
+                        document.querySelector(`div#${el.id}.incoming-request img`).setAttribute('src', json['friend_requests']['incoming'][el.id]['pfp_url'])
+                        document.querySelector(`div#${el.id}.incoming-request span[purp=status]`).innerHTML = json['friend_requests']['incoming'][el.id]['status']
+                    } else {
+                        alert('Someone has canceled their friend request!')
+                        el.remove()
+                    }
+                })
+                Array.from(document.getElementsByClassName('outgoing-request')).forEach(function(el, index) {
+                    if (json['friend_requests']['outgoing'][el.id] != null) {
+                        document.querySelector(`div#${el.id}.outgoing-request span[purp=friendusername]`).innerHTML = json['friend_requests']['outgoing'][el.id]['username']
+                        document.querySelector(`div#${el.id}.outgoing-request span[purp=frienddiscriminator]`).innerHTML = json['friend_requests']['outgoing'][el.id]['discriminator']
+                        document.querySelector(`div#${el.id}.outgoing-request img`).setAttribute('src', json['friend_requests']['outgoing'][el.id]['pfp_url'])
+                        document.querySelector(`div#${el.id}.outgoing-request span[purp=status]`).innerHTML = json['friend_requests']['outgoing'][el.id]['status']
+                    } else {
+                        alert('Someone has accepted your friend request!')
+                        el.remove()
+                    }
+                })
+            } else {
+                location.reload()
+            }
+        })
+        if (Object.keys(json.friend_requests.incoming).length > 0) {
+            document.getElementById('pendingfriends').style.color = 'red'
+            document.getElementById('pendingfriends').innerHTML = `Pending (${Object.keys(json.friend_requests.incoming).length})`
+        }
+    }, 5000)
+
+    function accept(el) {
+        fd = new FormData()
+        fd.append('token', token)
+        fd.append('acception', el.parentElement.parentElement.id)
+        fetch("{{ url_for('api.me.acceptfr') }}", {
+            method: 'POST',
+            body: fd
+        }).then(function(res) {
+            return res.json()
+        }).then(function(json) {
+            if (json['success']) {
+                alert('Success!')
+                document.getElementById(el.parentElement.parentElement.id).remove()
+            } else {
+                alert(`An error occured: ${json['error']}`)
+                location.reload()
+            }
+        })
+    }
+
+    function reject(el) {
+        alsoblock = confirm('Would you also like to block them?\nOk for yes, Cancel for no.')
+        fd = new FormData()
+        fd.append('token', token)
+        fd.append('rejection', el.parentElement.parentElement.id)
+        fd.append('alsoblock', alsoblock)
+        fetch("{{ url_for('api.me.rejectfr') }}", {
+            method: 'POST',
+            body: fd
+        }).then(function(res) {
+            return res.json()
+        }).then(function(json) {
+            if (json['success']) {
+                alert('Rejection successful!')
+                el.parentElement.parentElement.remove()
+            } else {
+                alert(`An error occured: ${json['error']}`)
+                location.reload()
+            }
+        })
+    }
+
+    function cancel(el) {
+        fd = new FormData()
+        fd.append('token', token)
+        fd.append('cancelation', el.parentElement.parentElement.id)
+        fetch("{{ url_for('api.me.cancelfr') }}", {
+            method: 'POST',
+            body: fd
+        }).then(function(res) {
+            return res.json()
+        }).then(function(json) {
+            if (json['success']) {
+                alert('Canceling successful!')
+                el.parentElement.parentElement.remove()
+            } else {
+                alert(`An error occured: ${json['error']}`)
+                location.reload()
+            }
+        })
+    }
+</script>
+{% endblock %}

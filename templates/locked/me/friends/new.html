@@ -1,0 +1,76 @@
+{% extends "locked/me/me_base.html"%}
+
+{% block title %}Add Friend{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    div#subsubbody {
+        overflow-y: auto;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Add Friend</h1>
+<input placeholder="Username" id="username" autocomplete="off">#<input placeholder="Discriminator" type="text" id="discriminator" minlength='6' maxlength='6'>
+<br>
+<br>
+<button onclick="add()">Add</button>
+<br>
+<br>
+<p>This may take some time :)</p>
+{% endblock %}
+
+{% block scripts %}
+<script defer>
+    document.getElementById('discriminator').addEventListener('keypress', function(e) {
+        if ((!(isFinite(e.key))) || (e.which == 32)) {
+            e.preventDefault()
+        }
+    })
+</script>
+<script>
+    function add() {
+        username = document.getElementById('username').value
+        discriminator = document.getElementById('discriminator').value
+
+        if (username != '' && discriminator != '') {
+            form = new FormData()
+            form.append('token', token)
+            form.append('username', username)
+            form.append('discriminator', discriminator)
+            fetch('{{ url_for("api.me.sendfr") }}', {
+                method: 'POST',
+                body: form
+            }).then(function(res) {
+                return res.json()
+            }).then(function(json) {
+                if (json['error'] == null) {
+                    alert('Friend request sent successfully!')
+                    window.location = '/me/'
+                } else {
+                    if (json['error'] == 'ACCOUNT_NONEXISTENT') {
+                        alert('That account doesn\'t exist!')
+                        document.getElementById('username').value = ''
+                        document.getElementById('discriminator').value = ''
+                    } else if (json['error'] == 'FRIEND_REQUEST_ALREADY_SENT') {
+                        alert('You have already sent that friend request, they have sent you a friend request, or that user is already a friend!')
+                        document.getElementById('username').value = ''
+                        document.getElementById('discriminator').value = ''
+                    } else if (json['error'] == 'THAT_IS_YOU') {
+                        alert('You can\'t send that friend request because that is you!\nI understand that you are friends with yourself, but you don\'t need to show it online. It is assumed.\nNow go make unassumed friends.')
+                        document.getElementById('username').value = ''
+                        document.getElementById('discriminator').value = ''
+                    } else {
+                        location.reload()
+                    }
+                }
+            })
+        } else {
+            alert('Please fill all fields.')
+        }
+    }
+</script>
+{% endblock %}
