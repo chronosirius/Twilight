@@ -1,10 +1,9 @@
-from json import JSONDecodeError
 from os import environ as env
 from traceback import format_exc
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, Blueprint, redirect, request, send_from_directory, render_template, url_for, g
+from flask import Flask, request, send_from_directory, render_template, url_for, g
 from werkzeug.exceptions import NotFound, HTTPException
 
 from datetime import datetime as dt, timedelta as td

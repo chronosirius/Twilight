@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mousetrap/1.6.5/mousetrap.min.js" integrity="sha512-+Jg3Ynmj9hse704K48H6rBBI3jdNBjReRGBCxUWFfOz3yVurnJFWtAWssDAsGtzWYw89xFWPxShuj2T6E9EOpg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="/static/ctxmenu.js"></script>
+        <script src="/static/modal.js"></script>
         <title>{% block title %}{% endblock %} | {{ appname }}</title>
         <style>
             /* basic styles that will show up everywhere */
@@ -144,16 +145,6 @@
     <body>
         <noscript><div style='position: fixed; overflow: none; width: 100vw; height: 100vh; background-color: white; z-index: 1000; top: 0; text-align: center;'><h1 style="color: orange;">This site requires JavaScript to function. Please enable it.</h1></div></noscript>
         <script async>
-            const BACKDROP = document.createElement('div')
-            BACKDROP.style.position = 'fixed'
-            BACKDROP.style.width = '100vw'
-            BACKDROP.style.height = '100vh'
-            BACKDROP.style.backgroundColor = 'black'
-            BACKDROP.style.opacity = '0.85'
-            BACKDROP.id = '___backdrop'
-            BACKDROP.style.zIndex = '1000'
-            BACKDROP.style.top = '0'
-            BACKDROP.style.left = '0'
             token = Object.fromEntries(new URLSearchParams(document.cookie.replace(/; /g, "&")))['authtoken']
             form = new FormData()
             form.append('token', token)
@@ -229,6 +220,37 @@
         <script>
             function new_server_modal() {
                 if (document.getElementById('new_server_modal') == null) {
+                    try {
+                    modal_t = new Modal('new_server_modal', 'Create a server', [
+                        {
+                            type: 'hidden',
+                            name: 'token',
+                            prefilled: token,
+                            custom_id: 'token'
+                        },
+                        {
+                            type: 'text',
+                            name: 'servername',
+                            placeholder: 'Server Name',
+                            custom_id: "servername"
+                            attributes: {
+                                required: true,
+                                autocomplete: 'off'
+                            }
+                        },
+                        {
+                            "_element": document.createElement('br'),
+                            "custom_id": '_break1'
+                        },
+                        {
+                            "_element": document.createElement('br'),
+                            "custom_id": '_break2'
+                        }
+                    ], [], true)
+                    modal_t.show()
+                    } catch (err) {
+                        alert(err.stack)
+                    }
                     modal = document.createElement('div')
                     modal.setAttribute('id', 'new_server_modal')
                     modal.style.position = 'absolute'
@@ -303,8 +325,8 @@
                     modal.appendChild(errordiv)
                     modal.style.zIndex = '1001'
 
-                    document.body.appendChild(BACKDROP.cloneNode(true))
-                    document.body.appendChild(modal)
+                    //document.body.appendChild(BACKDROP.cloneNode(true))
+                    //document.body.appendChild(modal)
                 }
             }
 

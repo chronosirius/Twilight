@@ -128,7 +128,7 @@ def signup_finish():
             flash('Invalid verification URL! To resend, please re-enter your info.')
             return redirect(url_for('accounts.signup'))
         else:
-            return rt('accounts/signup_finish.html', token=tk)
+            return rt('accounts/signup_finish.html', token=tk, prefilled_name=a['prefilled'])
     else:
         flash('You didn\'t provide a verification token!')
         return redirect(url_for('accounts.signup'))
