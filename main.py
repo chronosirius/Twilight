@@ -11,6 +11,8 @@ from datetime import datetime as dt, timedelta as td
 from utils.func import list_to_dict, generate_token
 from utils.permissions import has_perm
 
+from requests import get
+
 from db import Database
 
 servers = Database('storage/db/servers/')
@@ -18,6 +20,7 @@ users = Database('storage/db/users/')
 security = Database('storage/db/security/')
 dms = Database('storage/db/directmessages/')
 security = Database('storage/db/security/')
+invites = Database('storage/db/invites/')
 
 consolecode = generate_token()[0:15]
 
@@ -59,6 +62,12 @@ def sw_cache():
     r = send_from_directory('static', 'cache.js')
     r.headers.add_header('Service-Worker-Allowed', "/")
     return r
+
+@app.route('/firebug.js')
+def firebug():
+    rj = get('https://luphoria.com/fbl/fbl/firebug-lite-debug.js')
+    rq = send_from_directory('static', 'firebug.js')
+    return rq
 
 @app.errorhandler(Exception)
 def internal_error(err):

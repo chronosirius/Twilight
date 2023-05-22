@@ -1,0 +1,120 @@
+{% extends "locked/base.html" %}
+
+{% block styles %}
+<style>
+    span#channelname {
+        right: 10%;
+        top: 15%;
+        color: var(--text-color);
+        position: absolute;
+        text-align: right;
+    }
+
+    div#subbody {
+        position: relative;
+        left: 85px;
+        width: calc(100% - 85px);
+        height: 94%;
+    }
+
+    div#sidebar-lim {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    div#sidebar-lim::-webkit-scrollbar {
+        display: none;
+    }
+
+    .channel, .channel a.cname {
+        color: var(--text-color);
+        position: absolute;
+        min-width: 100%;
+        text-decoration: none;
+        margin: 0;
+        line-height:200%;
+        vertical-align:middle;
+    }
+
+    .channel span.typesymbol {
+        margin-left: 10%;
+        padding: 2%;
+        vertical-align: middle;
+    }
+
+    #dropdown {
+        display: none;
+        z-index: 100;
+        position: absolute;
+        width: 20%;
+        background-color: var(--spec-el-color);
+        color: var(--text-color);
+        height: fit-content;
+        top: 100%;
+    }
+
+    #dropdown p:hover {
+        background-color: var(--tlv-el-color);
+    }
+
+    #dropdown p:first-child {
+        margin-top: 5%;
+        margin-bottom: 0;
+        width: 90%;
+    }
+
+    #dropdown p:last-child {
+        margin-top: 0;
+        margin-bottom: 5%;
+        width: 90%;
+    }
+
+    #dropdown p:not(:first-child):not(:last-child) {
+        margin: 0;
+        width: 90%;
+    }
+
+    #serverheader h2 {
+        color: var(--text-color);
+        margin: 0;
+        text-align: center;
+        width: 20%;
+        position: absolute;
+    }
+
+    #serverheader:hover #dropdown {
+        display: block;
+    }
+
+    .flash {
+        animation: flash 1s;
+    }
+</style>
+{% endblock %}
+
+{% block topbar %}
+<div id='serverheader'>
+    <h2>{{ server['name'] }}</h2>
+    <div id='dropdown'>
+        <div style='margin:auto;'>
+            <p onclick='privacy()'>Privacy</p>
+            <br>
+            <p onclick='invite()'>Invite People</p>
+            {% if has_perm(perms, 64) %}
+            <br>
+            <p onclick="redirect('/servers/{{ server['id'] }}/settings')">Server Settings</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+{% for channel in server['channels'].values() %}
+<div class="channel">
+    <a href='/servers/{{ server["id"] }}/channels/{{ channel["id"] }}' class="cname">{{ channel.name }}</a>
+</div>
+{% endfor %}
+{% endblock %}

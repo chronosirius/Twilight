@@ -47,26 +47,7 @@
             }).then(function(res) {
                 return res.json()
             }).then(function(json) {
-                if (json['error'] == null) {
-                    alert('Friend request sent successfully!')
-                    window.location = '/me/'
-                } else {
-                    if (json['error'] == 'ACCOUNT_NONEXISTENT') {
-                        alert('That account doesn\'t exist!')
-                        document.getElementById('username').value = ''
-                        document.getElementById('discriminator').value = ''
-                    } else if (json['error'] == 'FRIEND_REQUEST_ALREADY_SENT') {
-                        alert('You have already sent that friend request, they have sent you a friend request, or that user is already a friend!')
-                        document.getElementById('username').value = ''
-                        document.getElementById('discriminator').value = ''
-                    } else if (json['error'] == 'THAT_IS_YOU') {
-                        alert('You can\'t send that friend request because that is you!\nI understand that you are friends with yourself, but you don\'t need to show it online. It is assumed.\nNow go make unassumed friends.')
-                        document.getElementById('username').value = ''
-                        document.getElementById('discriminator').value = ''
-                    } else {
-                        location.reload()
-                    }
-                }
+                alert(json.message)
             })
         } else {
             alert('Please fill all fields.')

@@ -31,3 +31,45 @@ def datetime_to_dict(dt=None):
         'hour': dt.hour,
         'minute': dt.minute
     }
+
+def crop_center(pil_img, crop_width, crop_height):
+    img_width, img_height = pil_img.size
+    return pil_img.crop(((img_width - crop_width) // 2,
+                         (img_height - crop_height) // 2,
+                         (img_width + crop_width) // 2,
+                         (img_height + crop_height) // 2))
+
+def crop_max_square(pil_img: 'PIL.Image.Image') -> 'PIL.Image.Image': #type: ignore
+    """Crops max-size square from center"""
+    return crop_center(pil_img, min(pil_img.size), min(pil_img.size))
+
+def reorder_index(j: list[dict], indexid: str = 'index'):
+    l: list[dict | None] = list()
+    for _ in range(len(j)):
+        l.append(None)
+    for d in j:
+        if type(d[indexid]) != str:
+            l[d[indexid]] = d
+        else:
+            match d[indexid]:
+                case 'top':
+                    l.insert(0, d)
+                case 'bottom':
+                    l.append(d)
+    for i, k in enumerate(l):
+        if k is None:
+            del l[i]
+    return l
+
+def get_timestamp() -> int:
+    return round(datetime.utcnow().timestamp())
+
+def xor(o1, o2) -> bool:
+    return bool(o1) != bool(o2)
+
+def expose(dict_: dict, keeplist: list, negate: bool = False):
+    d = dict()
+    for k in dict_:
+        if xor(k in keeplist, negate):
+            d[k] = dict_[k]
+    return d

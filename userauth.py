@@ -61,8 +61,7 @@ def signup_finish():
                 security[a['email']] = {
                     'password': a['password'],
                     'id': uid,
-                    'auth_tokens': [],
-                    'auth_token_info': {}
+                    'auth_tokens': {}
                 }
                 username = request.form['username']
                 for sym in blocked_symbols:
@@ -100,12 +99,18 @@ def signup_finish():
                     'token': authtoken_premature,
                     'type': 'user'
                 }))
-                security[a['email']]['auth_tokens'].append(authtoken_premature) #type: ignore
                 security[a['email']]['auth_token_info'][authtoken_premature] = {
-                    "datetime": round(dt.utcnow().timestamp()),
-                    "ip": g.remote_addr,
-                    "user_agent": request.user_agent.string,
-                    "token": authtoken_premature
+                    "created":{
+                        'unix_ts': round(dt.utcnow().timestamp()),
+                        "ip": g.remote_addr,
+                        "user_agent": request.user_agent.string
+                    },
+                    "token": authtoken_premature,
+                    "last_used":{
+                        'unix_ts': round(dt.utcnow().timestamp()),
+                        "ip": g.remote_addr,
+                        "user_agent": request.user_agent.string
+                    },
                 }
                 r = redirect(url_for('locked.me.me_main'))
                 r.set_cookie('authtoken', authtoken)
@@ -143,19 +148,24 @@ def login():
                 session['uid'] = security[request.form['email']]['id']
                 r = redirect(url_for('locked.me.me_main'))
                 token_premature = generate_token()[0:15]
-                security[request.form['email']]['auth_tokens'].append(token_premature) #type: ignore
-                security[request.form['email']]['auth_token_info'][token_premature] = {
-                    "datetime": round(dt.utcnow().timestamp()),
-                    "ip": g.remote_addr,
-                    "user_agent": request.user_agent.string,
-                    "token": token_premature
+                security[request.form['email']]['auth_tokens'][token_premature] = {
+                    "created":{
+                        'unix_ts': round(dt.utcnow().timestamp()),
+                        "ip": g.remote_addr,
+                        "user_agent": request.user_agent.string
+                    },
+                    "token": token_premature,
+                    "last_used":{
+                        'unix_ts': round(dt.utcnow().timestamp()),
+                        "ip": g.remote_addr,
+                        "user_agent": request.user_agent.string
+                    }
                 }
                 token = str(st.dumps({
                     'email': request.form['email'],
                     'token': token_premature,
                     'type': 'user'
                 }))
-                print(token)
                 r.set_cookie('authtoken', token, path="/")
                 return r
             else:

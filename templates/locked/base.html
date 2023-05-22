@@ -45,12 +45,22 @@
                 }
             }
 
+            @keyframes flash {
+                0% {
+                    background: #002277;
+                }
+                100% {
+                    background-color: previous;
+                }
+            }
 
             body {
                 padding: 0px;
                 margin: 0px;
                 border: 0px;
                 background-color: var(--background-color);
+                height: 100vh;
+                width: 100vw;
             }
 
             div#sidebar {
@@ -111,6 +121,13 @@
                 white-space: nowrap;
             }
 
+            div#sidebar-lim {
+                height: 90%;
+                top: 0;
+                overflow-y: scroll;
+                max-width: 100%;
+            }
+
             span[purp=username] {
                 margin-left: 3%;
             }
@@ -145,7 +162,11 @@
     <body>
         <noscript><div style='position: fixed; overflow: none; width: 100vw; height: 100vh; background-color: white; z-index: 1000; top: 0; text-align: center;'><h1 style="color: orange;">This site requires JavaScript to function. Please enable it.</h1></div></noscript>
         <script async>
-            token = Object.fromEntries(new URLSearchParams(document.cookie.replace(/; /g, "&")))['authtoken']
+            //gets token
+            window.token = Object.fromEntries(new URLSearchParams(document.cookie.replace(/; /g, "&")))['authtoken']
+            window.self_id = "{{ user['id'] }}"
+        </script>
+        <script async>
             form = new FormData()
             form.append('token', token)
             prefstat = localStorage.getItem('prefstat')
@@ -192,7 +213,7 @@
                             document.open()
                             document.write(text)
                             document.close()
-                            if (updater == null) {
+                            if (updater != null) {
                                 clearInterval(updater)
                             }
                         })
@@ -218,196 +239,111 @@
             })
         </script>
         <script>
+            console.log(token)
             function new_server_modal() {
                 if (document.getElementById('new_server_modal') == null) {
-                    try {
                     modal_t = new Modal('new_server_modal', 'Create a server', [
                         {
+                            element_type: 'input',
                             type: 'hidden',
                             name: 'token',
                             prefilled: token,
                             custom_id: 'token'
                         },
                         {
+                            element_type: 'input',
                             type: 'text',
                             name: 'servername',
                             placeholder: 'Server Name',
-                            custom_id: "servername"
+                            custom_id: "servername",
                             attributes: {
                                 required: true,
                                 autocomplete: 'off'
                             }
                         },
                         {
-                            "_element": document.createElement('br'),
-                            "custom_id": '_break1'
+                            element_type: 'break'
                         },
                         {
-                            "_element": document.createElement('br'),
-                            "custom_id": '_break2'
+                            element_type: 'break'
+                        },
+                        {
+                            element_type: 'input',
+                            type: 'file',
+                            name: 'icon',
+                            custom_id: 'icon'
                         }
-                    ], [], true)
+                    ], true, {
+                        action: "{{ url_for('locked.servers.server_create') }}",
+                        method: 'POST',
+                        attributes: {
+                            enctype: 'multipart/form-data'
+                        }
+                    })
                     modal_t.show()
-                    } catch (err) {
-                        alert(err.stack)
-                    }
-                    modal = document.createElement('div')
-                    modal.setAttribute('id', 'new_server_modal')
-                    modal.style.position = 'absolute'
-                    modal.style.width = '33%'
-                    modal.style.left = '33%'
-                    modal.style.height = '70%'
-                    modal.style.top = '15%'
-                    modal.style.color = 'var(--invert-text-color)'
-                    modal.style.backgroundColor = 'var(--invert-color)'
-                    modal.style.textAlign = 'center'
-
-                    head = document.createElement('h1')
-                    head.innerHTML = 'Create a server'
-                    modal.appendChild(head)
-
-                    form = document.createElement('form')
-
-                    hiddenid = document.createElement('input')
-                    hiddenid.setAttribute('name', 'token')
-                    hiddenid.setAttribute('type', 'hidden')
-                    hiddenid.setAttribute('value', token)
-                    form.appendChild(hiddenid)
-
-                    namel = document.createElement('input')
-                    namel.setAttribute('type', 'text')
-                    namel.setAttribute('required', 'true')
-                    namel.setAttribute('placeholder', 'server name')
-                    namel.setAttribute('name', 'servername')
-                    namel.setAttribute('autocomplete', 'off')
-                    form.appendChild(namel)
-
-                    form.appendChild(document.createElement('br'))
-                    form.appendChild(document.createElement('br'))
-
-                    file = document.createElement('input')
-                    file.setAttribute('type', 'file')
-                    file.setAttribute('accept', 'image/png, image/jpeg, image/gif')
-                    file.setAttribute('name', 'icon')
-                    file.style.width = 'min-content'
-
-                    e = document.createElement('div')
-                    e.style.marginLeft = '16.5%'
-                    e.appendChild(file)
-
-                    sub = document.createElement('input')
-                    sub.setAttribute('type', 'submit')
-
-                    form.appendChild(e)
-                    form.appendChild(document.createElement('br'))
-                    form.appendChild(sub)
-
-                    form.setAttribute('method', 'POST')
-                    form.setAttribute('action', '/')
-                    form.setAttribute('enctype', 'multipart/form-data')
-
-                    modal.appendChild(form)
-
-                    closebtn = document.createElement('button')
-                    closebtn.onclick = function() {
-                        document.getElementById('new_server_modal').remove()
-                        document.getElementById('___backdrop').remove()
-                    }
-                    closebtn.style.position = 'absolute'
-                    closebtn.style.right = '0'
-                    closebtn.style.top = '0'
-                    closebtn.innerHTML = 'X'
-
-                    errordiv = document.createElement('div')
-                    errordiv.setAttribute('id', 'new_server_modal_errordiv')
-
-                    modal.appendChild(closebtn)
-                    modal.appendChild(errordiv)
-                    modal.style.zIndex = '1001'
-
-                    //document.body.appendChild(BACKDROP.cloneNode(true))
-                    //document.body.appendChild(modal)
                 }
             }
 
             function update_status() {
-                modal = document.createElement('div')
-                modal.setAttribute('id', 'status_modal')
-                modal.style.position = 'absolute'
-                modal.style.width = '33%'
-                modal.style.left = '33%'
-                modal.style.height = '70%'
-                modal.style.top = '15%'
-                modal.style.color = 'var(--invert-text-color)'
-                modal.style.backgroundColor = 'var(--invert-color)'
-                modal.style.textAlign = 'center'
-
-                head = document.createElement('h1')
-                head.innerHTML = 'Set your status'
-                modal.appendChild(head)
-
-                status_inp = document.createElement('input')
-                status_inp.setAttribute('type', 'text')
-                status_inp.setAttribute('required', 'true')
-                status_inp.setAttribute('placeholder', 'status')
-                status_inp.setAttribute('name', 'servername')
-                status_inp.setAttribute('autocomplete', 'off')
-                status_inp.setAttribute('id', 'status')
-                modal.appendChild(status_inp)
-
-                modal.appendChild(document.createElement('br'))
-                modal.appendChild(document.createElement('br'))
-
-                sub = document.createElement('button')
-                sub.onclick = function() {
-                    stat = document.getElementById('status').value 
-                    if (stat != '') {
-                        localStorage.setItem('prefstat', stat)
-                        form = new FormData()
-                        form.append('token', token)
-                        form.append('status', stat)
-                        fetch('{{ url_for("locked.me.update_status") }}', {
-                            method: 'POST',
-                            body: form
-                        })
-                        document.getElementById('status_modal').remove()
-                        alert('Done!')
-                    } else {
-                        alert('Please fill out all fields.')
+                modal_t = new Modal('status_modal', 'Set Your Status', [
+                    {
+                        element_type: "input",
+                        placeholder: 'New Status',
+                        name: 'status',
+                        id: 'status_input',
+                        attributes: {
+                            required: 'true',
+                            autocomplete: 'off'
+                        }
+                    },
+                    {
+                        element_type: "break"
+                    },
+                    {
+                        element_type: 'break'
+                    },
+                    {
+                        element_type: 'button',
+                        text: 'Change Status',
+                        callback: function(ctx) {
+                            stat = ctx.inputs['status'].value
+                            if (stat != '') {
+                                localStorage.setItem('prefstat', stat)
+                                form = new FormData()
+                                form.append('token', token)
+                                form.append('status', stat)
+                                fetch('{{ url_for("locked.me.update_status") }}', {
+                                    method: 'POST',
+                                    body: form
+                                })
+                                ctx.modal.close()
+                                setTimeout(() => alert('Done!'), 100)
+                            } else {
+                                alert('Please fill all fields!')
+                                ctx.inputs['status'].focus()
+                            }
+                        },
+                        custom_id: 'change_status'
+                    },
+                    {
+                        element_type: 'button',
+                        text: 'Reset Status',
+                        custom_id: 'reset_status',
+                        callback: function(ctx) {
+                            localStorage.removeItem('prefstat')
+                            form = new FormData()
+                            form.append('token', token)
+                            form.append('status', 'online')
+                            fetch('{{ url_for("locked.me.update_status") }}', {
+                                method: 'POST',
+                                body: form
+                            })
+                            ctx.modal.close()
+                            setTimeout(() => alert('Reset successful.'), 100)
+                        }
                     }
-                }
-                sub.innerHTML = 'Change Status'
-                modal.appendChild(sub)
-
-                reset = document.createElement('button')
-                reset.onclick = function() {
-                    localStorage.removeItem('prefstat')
-                    alert('Reset successful.')
-                    form = new FormData()
-                    form.append('token', token)
-                    form.append('status', 'online')
-                    fetch('{{ url_for("locked.me.update_status") }}', {
-                        method: 'POST',
-                        body: form
-                    })
-                    document.getElementById('status_modal').remove()
-                }
-                reset.innerHTML = 'Reset status'
-                modal.appendChild(reset)
-
-                closebtn = document.createElement('button')
-                closebtn.onclick = function() {
-                    document.getElementById('status_modal').remove()
-                    document.getElementById('___backdrop').remove()
-                }
-                closebtn.style.position = 'absolute'
-                closebtn.style.right = '0'
-                closebtn.style.top = '0'
-                closebtn.innerHTML = 'X'
-                modal.appendChild(closebtn)
-                modal.style.zIndex = '1001'
-                document.body.appendChild(BACKDROP.cloneNode(true))
-                document.body.appendChild(modal)
+                ])
+                modal_t.show()
             }
         </script>
         <div id="sidebar">
@@ -426,7 +362,9 @@
         <div id="topbar">{% block topbar %}{% endblock %}</div>
         <div id="subbody">
             <div id="sidebar-pdm">
+                <div id="sidebar-lim">
                 {% block sidebar %}{% endblock %}
+                </div>
                 <div id="myinfo">
                     <div style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
                         <img src="{{ user['pfp_url'] }}" style="width: 12%; border-radius: 5px; vertical-align: middle;" id="mypfp" onclick="update_status()">
@@ -440,5 +378,6 @@
                 {% block content %}{% endblock %}
             </div>
         </div>
+        <script src="/firebug.js"></script>
     </body>
 </html>

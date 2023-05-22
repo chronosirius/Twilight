@@ -92,7 +92,7 @@
 {% block scripts %}
 <script>
     updater = setInterval(function() {
-        fetch(`{{ url_for('locked.me.self_as_json') }}?token=${token}`).then(function(res) {
+        fetch(`{{ url_for('locked.me.json') }}?token=${token}`).then(function(res) {
             return res.json()
         }).then(function(json) {
             if (json['error'] == null) {
@@ -139,13 +139,7 @@
         }).then(function(res) {
             return res.json()
         }).then(function(json) {
-            if (json['success']) {
-                alert('Success!')
-                document.getElementById(el.parentElement.parentElement.id).remove()
-            } else {
-                alert(`An error occured: ${json['error']}`)
-                location.reload()
-            }
+            alert(json.message)
         })
     }
 
@@ -161,13 +155,7 @@
         }).then(function(res) {
             return res.json()
         }).then(function(json) {
-            if (json['success']) {
-                alert('Rejection successful!')
-                el.parentElement.parentElement.remove()
-            } else {
-                alert(`An error occured: ${json['error']}`)
-                location.reload()
-            }
+            alert(json.message)
         })
     }
 
@@ -181,13 +169,7 @@
         }).then(function(res) {
             return res.json()
         }).then(function(json) {
-            if (json['success']) {
-                alert('Canceling successful!')
-                el.parentElement.parentElement.remove()
-            } else {
-                alert(`An error occured: ${json['error']}`)
-                location.reload()
-            }
+            alert(json.message)
         })
     }
 </script>
