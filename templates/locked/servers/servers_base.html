@@ -10,13 +10,6 @@
         text-align: right;
     }
 
-    div#subbody {
-        position: relative;
-        left: 85px;
-        width: calc(100% - 85px);
-        height: 94%;
-    }
-
     div#sidebar-lim {
         text-overflow: ellipsis;
         overflow: hidden;
@@ -28,14 +21,19 @@
         display: none;
     }
 
-    .channel, .channel a.cname {
+    .channel {
         color: var(--text-color);
-        position: absolute;
         min-width: 100%;
         text-decoration: none;
         margin: 0;
         line-height:200%;
         vertical-align:middle;
+    }
+
+    .channel a.cname {
+        color: var(--text-color);
+        text-decoration: none;
+        line-height: 200%;
     }
 
     .channel span.typesymbol {
@@ -76,20 +74,31 @@
         width: 90%;
     }
 
-    #serverheader h2 {
-        color: var(--text-color);
-        margin: 0;
-        text-align: center;
+    #serverheader {
+        min-height: 100%;
+        bottom:0;
+        top:0;
         width: 20%;
-        position: absolute;
+        text-align: center;
+        position:absolute;
     }
 
-    #serverheader:hover #dropdown {
-        display: block;
+    #serverheader h2 {
+        color: var(--text-color);
+        text-align: center;
+        min-height:100%;
+        margin:0;
+    }
+    #serverheader h2:hover {
+        background-color:black;
     }
 
     .flash {
         animation: flash 1s;
+    }
+
+    .zoomin {
+        animation: zoomin 1s;
     }
 </style>
 {% endblock %}
@@ -117,4 +126,28 @@
     <a href='/servers/{{ server["id"] }}/channels/{{ channel["id"] }}' class="cname">{{ channel.name }}</a>
 </div>
 {% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script async="false">
+    dropdown_open = false
+    document.getElementById('serverheader').addEventListener('click', function() {
+        document.getElementById('dropdown').style.display = (!dropdown_open ? "block": "none")
+        dropdown_open = !dropdown_open
+    })
+    try {
+    document.body.addEventListener('click', function(e) {
+        k = document.getElementById('dropdown')
+        l = document.getElementById('serverheader')
+        console.log(e.target.offsetParent, e.target)
+        if (e.target != k && e.target.offsetParent != k && e.target != l && e.target.offsetParent != l && dropdown_open) {
+            console.log(e.target, e.target.offsetParent == l)
+            k.style.display = "none"
+            dropdown_open = !dropdown_open
+        }
+    })
+    } catch (err) {
+        alert(err.stack)
+    }
+</script>
 {% endblock %}

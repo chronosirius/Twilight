@@ -28,7 +28,7 @@
     // ************************************************************************************************
     // Constants
     
-    var productionDir = "https://192.9.146.63/";
+    var productionDir = "https://raw.githubusercontent.com/firebug/firebug-lite/master/";
     var bookmarkletVersion = 4;
 
     // ************************************************************************************************

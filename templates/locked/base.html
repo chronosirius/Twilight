@@ -54,6 +54,24 @@
                 }
             }
 
+            .flash {
+                animation: flash 1s;
+            }
+
+            @keyframes zoom {
+                0% {
+                    transform: translateY(3px) scale(0.5);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            .zoomin {
+                animation: zoom 250ms;
+                animation-fill-mode: forwards;
+            }
+
             body {
                 padding: 0px;
                 margin: 0px;
@@ -85,10 +103,21 @@
                 top: 0px;
                 left: 85px;
                 text-align: right;
-                box-shadow: 0px 0px 20px rgba(0,0,0,0.40);
-                clip-path: inset(0px 0px -3px 0px);
                 z-index: 10;
                 border-bottom: black 1px;
+            }
+
+            div#topbar::before {
+                content:'';
+                z-index: -1;
+                position:absolute;
+                top:0;
+                left:0;
+                bottom:0;
+                right:0;
+                clip-path: inset(0px 0px -3px 0px);
+                box-shadow: 0px 0px 50px rgba(0,0,0,0.20);
+                /*pointer-events: none;*/
             }
 
             div#subbody {
@@ -378,6 +407,7 @@
                 {% block content %}{% endblock %}
             </div>
         </div>
-        <script src="/firebug.js"></script>
+        <script src="/firebug/build/firebug-lite-debug.js#startOpened=false"></script>
+        {% block scripts %}{% endblock %}
     </body>
 </html>

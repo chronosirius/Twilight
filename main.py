@@ -63,11 +63,15 @@ def sw_cache():
     r.headers.add_header('Service-Worker-Allowed', "/")
     return r
 
-@app.route('/firebug.js')
+@app.route('/firebug-lite-debug.js')
 def firebug():
     rj = get('https://luphoria.com/fbl/fbl/firebug-lite-debug.js')
-    rq = send_from_directory('static', 'firebug.js')
+    rq = send_from_directory('static', 'firebug-lite-debug.js')
     return rq
+
+@app.route('/firebug/<path:path>')
+def firebug2(path):
+    return send_from_directory('firebug-lite-master', path)
 
 @app.errorhandler(Exception)
 def internal_error(err):
