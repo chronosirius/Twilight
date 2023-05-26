@@ -10,7 +10,7 @@ servers_bp = Blueprint('servers', __name__.split('.')[0], url_prefix='/servers/'
 @servers_bp.before_request
 def check_servers():
     if request.path.split('/')[2] == 'create':
-        return
+        return #flask can't tell the difference between no return statement and a return (None) so I can do this
     if request.path.split('/')[2] not in servers.keys():
         abort(404)
     if len(request.path.split('/')) == 3 or request.path.split('/')[3] == '':
@@ -21,7 +21,8 @@ def check_servers():
 def ctx_processor():
     if g.get('server'):
         return dict(
-            server=g.server
+            server=g.server,
+            perms=calculate_perms(g.server, g.id)
         )
     else:
         return dict()
@@ -40,14 +41,16 @@ def server_create():
             'id': sid,
             'link': f'/servers/{sid}/home',
             'channels': {
-                (start_cid := generate_token()): {
-                    'id': start_cid,
-                    'name': 'start',
-                    'flags': [],
-                    'material_symbol': 'tag',
-                    'history': [],
-                    'category': 'ungrouped',
-                    'overwrites': []
+                'ungrouped': {
+                    (start_cid := generate_token()): {
+                        'id': start_cid,
+                        'name': 'start',
+                        'flags': [],
+                        'material_symbol': 'tag',
+                        'history': [],
+                        'category': 'ungrouped',
+                        'overwrites': []
+                    }
                 }
             },
             'description': '',
@@ -104,3 +107,11 @@ def server_home(sid):
         channel={
             'name': 'Home'
         })
+
+@servers_bp.route('/<sid>/channels/<cid>')
+def channel(sid, cid):
+    if cid not in servers[sid]['channels'].keys(): #type: ignore
+        abort(404)
+    return rt('locked/servers/channel.html', 
+
+    )
