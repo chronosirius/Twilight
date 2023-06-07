@@ -117,6 +117,7 @@ class Modal {
 
     show() {
         document.body.appendChild(this.modal)
+        document.getElementById(this.modal.id).classList.toggle('zoomin')
         document.body.appendChild(BACKDROP.cloneNode(true))
     }
 

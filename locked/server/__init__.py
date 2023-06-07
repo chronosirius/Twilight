@@ -1,9 +1,34 @@
 import os
 from flask import Blueprint, request, redirect, url_for, abort, g, render_template as rt
 from main import servers, users
-from utils.func import crop_max_square, generate_token, get_timestamp 
+from utils.func import crop_max_square, generate_token, get_timestamp, list_to_dict, reorder_index
 from utils.permissions import ADMIN, BASIC, calculate_perms
 from PIL import Image
+
+def resolve_members(srv):
+    p = list()
+    for id, member in srv['members'].items():
+        member['id'] = id
+        totperms = calculate_perms(srv, member['id'])
+        n = {
+            'id': member['id'],
+            'vismember': list_to_dict(users[member['id']]['servers'])[srv['id']]['me'], #type: ignore
+            'roles': [srv['roles'][role] for role in member['roles'] if 'INVISIBLE' not in srv['roles'][role]['flags']],
+            'serverbadges': [srv['roles'][role]['badge'] for role in member['roles'] if 'BADGE' in srv['roles'][role]['flags']],
+            'regbadges': [badge for badge in users[member['id']]['badges']],
+            'joinedat': users[member['id']]['joined_at'],
+            'permissions': totperms,
+            'pfp_url': users[member['id']]['pfp_url']
+        }
+        try:
+            n['top_role'] = reorder_index(n['roles'])[0]
+        except:
+            n['top_role'] = {
+                'color': 'var(--text-color)'
+            }
+        p.append(n)
+    return p
+
 
 servers_bp = Blueprint('servers', __name__.split('.')[0], url_prefix='/servers/', template_folder="../templates/locked/servers/")
 
@@ -107,6 +132,10 @@ def server_home(sid):
         channel={
             'name': 'Home'
         })
+
+@servers_bp.route('/<sid>/members')
+def members(sid):
+    return rt('locked/servers/members.html', members=resolve_members(g.server))
 
 @servers_bp.route('/<sid>/channels/<cid>')
 def channel(sid, cid):

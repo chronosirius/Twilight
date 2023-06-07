@@ -8,3 +8,4 @@ Flask-Moment
 Flask-Session
 git+https://github.com/chronosirius/nosql-db-client
 simple-websocket
+marko

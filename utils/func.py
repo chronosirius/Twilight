@@ -59,7 +59,14 @@ def reorder_index(j: list[dict], indexid: str = 'index'):
     for i, k in enumerate(l):
         if k is None:
             del l[i]
-    return l
+    def _check(k):
+        if k[indexid] == 'top':
+            return float('-inf')
+        elif k[indexid] == 'bottom':
+            return float('inf')
+        else:
+            return k[indexid]
+    return sorted(j, key=_check)
 
 def get_timestamp() -> int:
     return round(datetime.utcnow().timestamp())

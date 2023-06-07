@@ -1,16 +1,16 @@
-from flask import Blueprint, request, redirect, url_for, flash, g
-from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+from flask import Blueprint, request, render_template, flash, redirect, url_for, g
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from os import environ as env
-from main import security, users, servers
+from main import users, security
 
-locked_bp = Blueprint('locked', __name__.split('.')[0], template_folder='templates/locked/')
+userbp = Blueprint("user", __name__.split('.')[0])
 
-@locked_bp.before_request
+@userbp.before_request
 def check_authorization():
     t = request.cookies.get('authtoken', request.args.get('authtoken', request.form.get('authtoken', ''))).strip(' ') #type: ignore
     if t == '':
-        flash('Please log in again.')
-        return redirect(url_for('accounts.login'))
+        g.user = 'anonymous'
+        return
     try:
         try:
             data, timestamp = URLSafeTimedSerializer(env['SECRET_KEY'], salt=b'authtoken').loads(t, max_age=60*60*24*30, return_timestamp=True)
@@ -25,8 +25,8 @@ def check_authorization():
         if usertype == 'bot':
             raise ValueError
     except (BadSignature, KeyError, SignatureExpired):
-        flash('Invalid authtoken!')
-        return redirect(url_for('accounts.login'))
+        g.user = 'anonymous'
+        return
     except ValueError:
         return {
             "success": False,
@@ -34,11 +34,11 @@ def check_authorization():
             "message": "This portion of the server cannot serve your request. Please use the API."
         }, 418
     if email not in security.keys():
-        flash('That email is not registered!')
-        return redirect(url_for('accounts.signup'))
+        g.user = 'anonymous'
+        return
     if token not in security[email]['auth_tokens'].keys(): #type: ignore
-        flash('You have been logged out.')
-        return redirect(url_for('accounts.login'))
+        g.user = 'anonymous'
+        return
     
     g.id = security[email]['id']
     g.user = users[security[email]['id']]
@@ -51,36 +51,10 @@ def check_authorization():
         "ip": g.remote_addr,
         "user_agent": request.user_agent.string
     }
-    print(data)
-    print(servers)
 
-@locked_bp.context_processor
-def jinja_context_locked():
-    def get_user_details(id):
-        if id in users.keys():
-            return users['id']
-        else:
-            return {
-                'name': 'Deleted User',
-                'pfp_url': '/cdn/__default_user__.webp'
-            }
-    def get_server_details(id):
-        if id in servers.keys():
-            return servers[id]
-        
-    def check_in_server(id):
-        if id in servers.keys():
-            return (g.id in servers[id]['members'].keys()) #type: ignore
-    return dict(
-        user=g.user,
-        servers=[servers[sid] for sid in [s['id'] for s in g.user['servers']]], #type: ignore
-        get_user_details=get_user_details,
-        get_server_details=get_server_details,
-        check_in_server=check_in_server
-    )
-
-from .me import me_bp
-from .server import servers_bp
-
-locked_bp.register_blueprint(me_bp)
-locked_bp.register_blueprint(servers_bp)
+@userbp.route('/<uid>')
+def user(uid):
+    if uid in users.keys():
+        if request.headers.get('X-TWILIGHT-Is-Iframe'):
+            
+            return render_template('iframe/user.html', user=users[uid])

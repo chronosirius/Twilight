@@ -89,7 +89,8 @@ def signup_finish():
                     'blocked': [],
                     'joined_at': round(dt.utcnow().timestamp()),
                     'badges': [],
-                    'notify': []
+                    'notify': [],
+                    'privacy': 0 #0 - friends & server members only, 1 - users only, 2 - anyone
                 }
                 #session.clear()
                 session['uid'] = uid
@@ -99,7 +100,7 @@ def signup_finish():
                     'token': authtoken_premature,
                     'type': 'user'
                 }))
-                security[a['email']]['auth_token_info'][authtoken_premature] = {
+                security[a['email']]['auth_tokens'][authtoken_premature] = {
                     "created":{
                         'unix_ts': round(dt.utcnow().timestamp()),
                         "ip": g.remote_addr,

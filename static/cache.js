@@ -12,7 +12,7 @@ async function fastget({req}) {
     }
 
     try {
-        network_res = await fetch(req)
+        const network_res = await fetch(req)
         if (network_res.status == 502) {
             if (req.headers.get('Accept').includes('application/json')) {
                 return new Response('{"error": "SERVICE_DOWN", "http_code": 502}', {
@@ -63,6 +63,7 @@ async function fastget({req}) {
         }
         return network_res;
     } catch (err) {
+        console.error(err)
         if (req.headers.get('Accept').includes('application/json')) {
             return new Response('{"error": "NO_NETWORK", "http_code": 408}', {
                 status: 408,
@@ -119,7 +120,9 @@ self.addEventListener('activate', ev => {
 })
 
 self.addEventListener('fetch', ev => {
-    ev.respondWith(fastget({
+    r = fastget({
         req: ev.request
-    }))
+    })
+    ev.respondWith(r)
+    // updateCaches(ev.request)
 })

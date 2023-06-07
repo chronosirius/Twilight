@@ -1,1 +1,111 @@
 {% extends "locked/servers/servers_base.html" %}
+
+{% block title %}Members [{{ server.name }}] | {{ appname }}{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .member {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin:auto;
+        cursor: pointer;
+        user-select: none;
+    }
+    .member:not(.iframe-open) {
+        width: 50%;
+    }
+
+    .member.iframe-open {
+        width: 100%;
+    }
+
+    .member:hover {
+        background-color: var(--tlv-el-color);
+        border-radius: 25px;
+    }
+    img.memberpfp {
+        width: 10%;
+        border-radius: 40%;
+        padding:20px;
+    }
+    .member p {
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="memberplace">
+    {% for member in members %}
+        <div class='member' id="{{ member['id'] }}">
+            <img src="{{ member['pfp_url'] }}" class="memberpfp">
+            <p>{{ member.vismember.nickname }}</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    var u;
+    Array.from(document.querySelectorAll('.member')).forEach(function(el) {
+        el.addEventListener('click', function(ev) {
+            const uid = ev.target.closest('.member').id
+            if (document.getElementById('member-view-controls') == null) {
+                console.log('doesnt exist')
+                let fr = document.createElement('iframe')
+                fr.id = 'member-view-controls'
+                fr.setAttribute('viewing', uid)
+                fr.style = 'position: absolute; right: 0; height: 100%; top:0; border: none; border-left: revert;width:50%;'
+                document.querySelector('#subsubbody').appendChild(fr)
+                document.querySelector('#memberplace').style.width = '50%'
+                Array.from(document.querySelectorAll('.member:not(.iframe-open)')).forEach(function(el) {
+                    el.classList.toggle('iframe-open')
+                })
+                let b = new Blob(['<html><head><style>@media (prefers-color-scheme: light){:root{--text-color:black;--bg-color:white;}} @media (prefers-color-scheme:dark){:root{--text-color:white;--bg-color:#232323}} body{color:var(--text-color); background-color: var(--bg-color);}</style></head><body>Loading, please wait...</body></html>'], {type: 'text/html'})
+                let k = URL.createObjectURL(b)
+                fr.src = k
+                const headers = new Headers()
+                headers.set('X-TWILIGHT-Is-iFrame', '1')
+                fetch(`${location.origin}/user/${uid}`, {
+                    headers: headers
+                }).then(function(res) {
+                    return res.blob()
+                }).then(function(blob) {
+                    u = URL.createObjectURL(blob)
+                    fr.src = u
+                })
+            } else {
+                console.log('exists')
+                let fr = document.getElementById('member-view-controls')
+                if (fr.getAttribute('viewing') != uid) {
+                    console.log('not same')
+                    const headers = new Headers()
+                    headers.set('X-TWILIGHT-Is-iFrame', '1')
+                    fetch(`${location.origin}/user/${uid}`, {
+                        headers: headers
+                    }).then(function(res) {
+                        return res.blob()
+                    }).then(function(blob) {
+                        URL.revokeObjectURL(u)
+                        u = URL.createObjectURL(blob)
+                        fr.src = u
+                        fr.setAttribute('viewing', uid)
+                    })
+                } else {
+                    console.log('same')
+                    fr.remove()
+                    URL.revokeObjectURL(u)
+                    document.getElementById('memberplace').style.width = '100%'
+                    Array.from(document.querySelectorAll('.member.iframe-open')).forEach(function(el) {
+                        el.classList.toggle('iframe-open')
+                    })
+                }
+            }
+        })
+    })
+</script>
+{% endblock %}

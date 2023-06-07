@@ -2,13 +2,30 @@
 
 {% block title %}Home [{{ server['name'] }}] | {{ appname }}{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<style>
+    div#main-home {
+        text-align: center;
+        margin:auto;
+        max-width: 100%;
+        flex-direction: column;
+        align-items: center;
+        display: flex;
+        position: absolute;
+        top:40%;
+        left:50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div style="text-align: center; margin: auto;">
-    <img src="{{ server['icon'] }}" style="width:20%;">
-    <h1>{{ servername }}</h1>
-    <p>{{ server['description'] }}</p>
+<div id='main-home'>
+    <img src="{{ server['icon'] }}" style="width:100%; border-radius: 20%;max-width: 177.031px;">
+    <h1 style='margin-bottom:0; margin-top:16px;'>{{ servername }}</h1>
+    <p style="word-break:break-all;{% if server.description|length <= 0 %}margin:0;{% else %}margin-bottom:0;{% endif %}">{{ server['description'] }}</p>
     <p>{{ server['welcome_message'] }}</p>
-    <br>
     <a href="/servers/{{ sid }}/members" style="color: var(--text-color);">See all members</a>
 </div>
 {% endblock %}
