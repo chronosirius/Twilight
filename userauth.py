@@ -90,7 +90,7 @@ def signup_finish():
                     'joined_at': round(dt.utcnow().timestamp()),
                     'badges': [],
                     'notify': [],
-                    'privacy': 0 #0 - friends & server members only, 1 - users only, 2 - anyone
+                    'privacy': 1 #0 - friends & server members only, 1 - users only, 2 - anyone
                 }
                 #session.clear()
                 session['uid'] = uid

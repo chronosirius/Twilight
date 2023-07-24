@@ -1,1 +1,58 @@
 {% extends "locked/servers/servers_base.html" %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    div#messages {
+        position: absolute;
+        top:0;
+        left:0;
+        width: 100%;
+        height: 95%;
+    }
+
+    div#messagebox-wrapper {
+        background-color: var(--spec-el-color);
+        position: absolute;
+        bottom: 1.5%;
+        left: 2.5%;
+        width: 95%;
+        min-height: 7%;
+        border-radius: 15px / 15px;
+    }
+
+    textarea#messagebox {
+        position: absolute;
+        outline: none;
+        top: 25%;
+        left: 2.5%;
+        min-height: 50%;
+        width: 95%;
+        resize: none;
+    }
+
+    /*input#messagebox {
+        position: absolute;
+        width: 95%;
+        padding: 0;
+        border: none;
+        margin: 0;
+        border-radius: 50px / 50px;
+        height: 100%;
+    }*/
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="messages">
+
+</div>
+<div id="messagebox-wrapper">
+    <textarea id='messagebox'></textarea>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+</script>
+{% endblock %}

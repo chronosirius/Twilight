@@ -8,6 +8,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mousetrap/1.6.5/mousetrap.min.js" integrity="sha512-+Jg3Ynmj9hse704K48H6rBBI3jdNBjReRGBCxUWFfOz3yVurnJFWtAWssDAsGtzWYw89xFWPxShuj2T6E9EOpg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="/static/ctxmenu.js"></script>
         <script src="/static/modal.js"></script>
+        <script src="/static/twilightlib.js"></script>
         <title>{% block title %}{% endblock %} | {{ appname }}</title>
         <style>
             /* basic styles that will show up everywhere */
@@ -15,6 +16,8 @@
 
             * {
                 font-family: 'Ubuntu', sans-serif;
+                hyphens: auto;
+                hyphenate-character: "-";
             }
 
             @media (prefers-color-scheme: dark) {
@@ -47,7 +50,7 @@
 
             @keyframes flash {
                 0% {
-                    background: #002277;
+                    background-color: #002277;
                 }
                 100% {
                     background-color: previous;
@@ -71,7 +74,15 @@
                 animation: zoom 250ms;
                 animation-fill-mode: forwards;
                 transition: .5s;
-                transform-origin: middle;
+                transform-origin: center;
+                transform: scale(1.0);
+            }
+
+            .zoomout {
+                animation: zoom 250ms;
+                animation-fill-mode: backwards;
+                transition: .5s;
+                transform-origin: center;
                 transform: scale(1.0);
             }
 
@@ -170,6 +181,18 @@
                 border-radius: 35%;
                 height: 100%;
                 cursor:pointer;
+                transform: scale(1);
+                transition: transform 100ms linear;
+            }
+
+            div#myinfo img:hover {
+                transform: scale(1.05);
+                transition: all 100ms ease-out;
+            }
+
+            div#myinfo img:active {
+                transform: scale(1.1) translateZ(0);
+                box-shadow: 0px 0px 5px darkcyan;
             }
 
             div#myinfo div {
@@ -244,6 +267,48 @@
                 height: 1px;
                 border: none;
             }
+
+            #me-sidebar-icon {
+                width:80%;
+                display: block; 
+                margin-left: auto; 
+                margin-right: auto;
+                border-radius: 25%; 
+                margin-top: 10%;
+                transition: transform 100ms ease-out;
+            }
+
+            #me-sidebar-icon:hover {
+                transform: scale(1.1);
+                transition: all 250ms ease-in;
+            }
+
+            #me-sidebar-icon:active {
+                transform: scale(1.12);
+                box-shadow: 1px 1px 5px darkblue;
+            }
+
+            .server-sidebar-icon img {
+                width: 80%;
+                object-position: center;
+                object-fit: cover;
+                border-radius: 25%;
+                margin-left:auto;
+                margin-right:auto;
+                display:block;
+                transform: scale(1);
+                transition: transform 150ms ease-out;
+            }
+
+            .server-sidebar-icon img:hover {
+                transform: scale(1.1);
+                transition: all 250ms ease-in;
+            }
+
+            .server-sidebar-icon img:active {
+                transform: scale(1.15);
+                box-shadow: 1px 1px 5px darkblue;
+            }
         </style>
         {% block styles %}{% endblock %}
         {% block headscripts %}{% endblock %}
@@ -286,47 +351,7 @@
                 navigator.sendBeacon("{{ url_for('locked.me.update_status') }}", fd)
             })
         </script>
-        <script defer>
-            history.replaceState({
-                prev_url: window.location.href
-            }, "")
-            Array.from(document.getElementsByTagName('a')).forEach(function(el) {
-                el.addEventListener('click', function(ev) {
-                    ev.preventDefault()
-                    fetch(el.getAttribute('href')).then(function(res) {
-                        return res.text()
-                    }).then(function(text) {
-                            history.pushState({
-                                prev_url: window.location.href
-                            }, "", el.getAttribute('href'))
-                            document.open()
-                            document.write(text)
-                            document.close()
-                            if (updater != null) {
-                                clearInterval(updater)
-                            }
-                        })
-                    })
-                })
-
-            window.addEventListener('popstate', function(ev) {
-                console.log(ev.state)
-                document.dispatchEvent('leave')
-                if (ev.state) {
-                    fetch(ev.state.prev_url).then(function(res) {
-                        return res.text()
-                    }).then(function(text) {
-                        history.pushState({
-                            prev_url: window.location.href
-                        }, "", ev.state.prev_url)
-                        
-                        document.open()
-                        document.write(text)
-                        document.close()
-                    })
-                }
-            })
-        </script>
+        
         <script>
             console.log(token)
             function new_server_modal() {
@@ -440,12 +465,12 @@
         </script>
         <div id="sidebar">
             <a href="/me/">
-                <img src="/favicon.ico" width="80%" style="display: block; margin-left: auto; margin-right: auto; border-radius: 25%; padding-top: 10%">
+                <img src="/favicon.ico" id="me-sidebar-icon">
             </a>{% for server in servers %}
             <br>
             <a href="{{ server['link'] }}" class="server-sidebar-icon" id="{{ server['id'] }}" server="{{ server['id'] }}">
                 <div style="display:block; margin-left:auto;margin-right:auto;">
-                    <img src="{{ server['icon'] }}" width="80%" style="object-position: center; object-fit: cover; border-radius: 25%; margin-left:auto;margin-right:auto;display:block;" server="{{ server['id'] }}">
+                    <img src="{{ server['icon'] }}" server="{{ server['id'] }}">
                 </div>
             </a>{% endfor %}
             <br>
@@ -475,6 +500,20 @@
             </div>
         </div>
         <!-- <script src="/firebug/build/firebug-lite-debug.js#startOpened=false"></script> -->
+        <script defer>
+            console.log('starting ezpagechange')
+            Array.from(document.getElementsByTagName('a')).forEach(function(el) {
+                console.log('registering', el)
+                
+                el.addEventListener('click', function(ev) {
+                    ev.preventDefault()
+                    redirect(ev.target.closest('a').getAttribute('href'))
+                    console.log('clicked', ev.target.closest('a'))
+                })
+                console.log('registered', el)
+            })
+            console.log('registered')
+        </script>
         {% block scripts %}{% endblock %}
     </body>
 </html>

@@ -81,18 +81,27 @@
     }
 
     #dropdown {
-        display: none;
+        visibility: hidden;
+        opacity: 0;
         z-index: 100;
         position: absolute;
-        width: 97.5%;
-        margin-left:1.25%;
-        margin-right:1.25%;
         background-color: var(--spec-el-color);
         color: var(--text-color);
-        height: fit-content;
         top: 100%;
         box-shadow: 0px 1px 3px black;
         border-radius: 5px;
+        transition: all 250ms ease;
+        height: 0;
+        width: 97.5%;
+        margin-left:1.25%;
+        margin-right:1.25%;
+    }
+
+    #dropdown.dropdown-visible {
+        visibility: visible;
+        opacity: 1;
+        display: block;
+        height: {% if has_perm(perms, 32) %} 116.81px {%else%} 79.48px {%endif%};
     }
 
     #dropdown p:hover {
@@ -207,20 +216,17 @@
     const server_id = '{{ server.id }}'
 </script>
 <script async="false">
-    dropdown_open = false
     document.getElementById('serverheader').addEventListener('click', function() {
-        document.getElementById('dropdown').style.display = (!dropdown_open ? "block": "none")
-        dropdown_open = !dropdown_open
-    })
-    document.getElementById('dropdown').addEventListener('click', function(e) {
-        e.stopPropagation()
+        document.getElementById('dropdown').classList.toggle('dropdown-visible')
+        if (document.getElementById('dropdown').classList.contains('dropdown-visible')) {
+
+        }
     })
     document.body.addEventListener('click', function(e) {
         k = document.getElementById('dropdown')
         l = document.getElementById('serverheader')
-        if (e.target.id != k.id && e.target.parentNode.id != k.id && e.target.id != l.id && e.target.parentNode.id != l.id && dropdown_open) {
-            k.style.display = "none"
-            dropdown_open = !dropdown_open
+        if (e.target.id != k.id && e.target.id != l.id && e.target.parentNode.id != l.id) {
+            k.classList.remove('dropdown-visible')
         }
     })
 </script>

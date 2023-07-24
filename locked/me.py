@@ -7,7 +7,7 @@ me_bp = Blueprint('me', __name__.split('.')[0], url_prefix='/me/', template_fold
 
 @me_bp.route('/')
 def me_main():
-    return rt('me.html')
+    return rt('me.html', friends=[users[friend] for friend in g.user['friends']])
 
 @me_bp.route('/update_status', methods=['POST'])
 def update_status():
@@ -35,7 +35,7 @@ def friends_pending():
 
 @me_bp.route('/json')
 def json():
-    friendlist = [users[friend['id']] for friend in g.user['friends']]
+    friendlist = [users[friend] for friend in g.user['friends']]
     frienddict = dict()
     for f in friendlist:
         frienddict[f['id']] = expose(f, ['username', 'discriminator', 'pfp_url', 'status']) #type: ignore
@@ -92,26 +92,31 @@ def sendfr():
                         return {
                             'success': False,
                             'code': 409,
-                            'message': 'We know you want to friend them. Perhaps try friending someone else?'
+                            'message': 'We know you want to friend them. Perhaps try friending someone else?',
+                            'machinecode': 'FR_SENT_ALREADY'
                         }, 409
                 else:
                     continue
             return {
-                'message': 'You\'re trying to send a friend request to a nonexistent person. Even trying to friend yourself would be better! (Call 988 - it\'s advisable.)',
+                'message': 'You\'re trying to send a friend request to a nonexistent person. Get help and don\'t friend random people online.',
                 'code': 404,
-                'success': False
+                'success': False,
+                'machinecode': 'RECIPIENT_NONEXISTENT'
             }, 404
         else:
             return {
                 'success': False,
-                'message': 'We know that your only friend is you, but you don\'t need to show that online, too.',
-                'code': 400
+                'message': 'We all understand that your only friend is you, but you don\'t need to show that online, too.',
+                'code': 400,
+                'machinecode': 'SELF_FR'
             }, 400
     else:
         return {
             'message': 'A field value was missing. ANY_OR_ALL("username", "discriminator")',
             'code': 400,
-            'success': False
+            'success': False,
+            'machinecode': 'FIELD_MISSING',
+            'missing_key': ['ANY_OR_ALL', 'username', 'discriminator']
         }, 400
 
 @me_bp.route('/fr/accept', methods=['POST'])
@@ -199,3 +204,8 @@ def cancelfr():
             'message': 'A field value was missing. ("cancelation")',
             'code': 400
         }, 400
+
+
+@me_bp.route('/dm/<reciever>')
+def dm(reciever):
+    return rt('dm.html')

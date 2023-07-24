@@ -2,12 +2,46 @@
 
 {% block title %}Me{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<style>
+    .friend-message-button {
+        transform: none;
+        -webkit-font-smoothing: subpixel-antialiased;
+        transition: all 100ms ease-out;
+        will-change: transform;
+        border-radius: 4px / 4px;
+        background-color: #648cc8;
+        border: 1px solid #648cc7;
+        cursor: pointer;
+        height: 40px;
+        width: 150px;
+    }
+
+    .friend-message-button:not(:disabled):hover {
+        transform: translateY(-2px) translateZ(0);
+        box-shadow: 0px 2px 3px black;
+    }
+
+    .friend-message-button:disabled {
+        opacity: 0.5;
+        cursor: unset;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<br>
 <div id="friendslist">
     {% if friends|length > 0 %}
         {% for friend in friends %}
             <div id="{{ friend['id'] }}" class="friend">
-                <div style="overflow: auto; display: flex; align-items: center;"><img src="{{ friend['pfp_url'] }}" style='border-radius: 50%; float: left; padding: 2%; width: 10%; vertical-align:middle;'><div><span purp="friendusername">{{ friend['username'] }}</span>#<span purp="frienddiscriminator">{{ friend['discriminator'] }}</span><br><br><span purp="status">{{ friend['status'] }}</span></div><button class='friend-message-button' onclick='window.location = "{{ url_for('me.dm', reciever=friend['id']) }}"'>Message</button></div>
+                <div style="overflow: auto; display: flex; align-items: center;">
+                    <img src="{{ friend['pfp_url'] }}" style='border-radius: 50%; float: left; padding: 2%; width: 10%; vertical-align:middle; max-height: 134px;'>
+                    <div style="flex-grow: 0.75;">
+                        <span purp="friendusername">{{ friend['username'] }}</span>#<span purp="frienddiscriminator">{{ friend['discriminator'] }}</span><br><br><span purp="status">{{ friend['status'] }}</span>
+                    </div>
+                    <button class='friend-message-button' onclick='window.location = "{{ url_for('locked.me.dm', reciever=friend['id']) }}"' disabled>Message</button></div>
             </div>
         {% endfor %}
     {% else %}

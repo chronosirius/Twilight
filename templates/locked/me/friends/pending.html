@@ -115,25 +115,26 @@
                         document.querySelector(`div#${el.id}.outgoing-request img`).setAttribute('src', json['friend_requests']['outgoing'][el.id]['pfp_url'])
                         document.querySelector(`div#${el.id}.outgoing-request span[purp=status]`).innerHTML = json['friend_requests']['outgoing'][el.id]['status']
                     } else {
-                        alert('Someone has accepted your friend request!')
+                        alert('Someone has accepted or rejected your friend request! ' + el.id)
                         el.remove()
                     }
+                    
                 })
+                if (Object.keys(json.friend_requests.incoming).length > 0) {
+                    document.getElementById('pendingfriends').style.color = 'red'
+                    document.getElementById('pendingfriends').innerHTML = `Pending (${Object.keys(json.friend_requests.incoming).length})`
+                }
             } else {
                 location.reload()
             }
-        })
-        if (Object.keys(json.friend_requests.incoming).length > 0) {
-            document.getElementById('pendingfriends').style.color = 'red'
-            document.getElementById('pendingfriends').innerHTML = `Pending (${Object.keys(json.friend_requests.incoming).length})`
-        }
+        }) 
     }, 5000)
 
     function accept(el) {
         fd = new FormData()
         fd.append('token', token)
         fd.append('acception', el.parentElement.parentElement.id)
-        fetch("{{ url_for('api.me.acceptfr') }}", {
+        fetch("{{ url_for('locked.me.acceptfr') }}", {
             method: 'POST',
             body: fd
         }).then(function(res) {
@@ -149,7 +150,7 @@
         fd.append('token', token)
         fd.append('rejection', el.parentElement.parentElement.id)
         fd.append('alsoblock', alsoblock)
-        fetch("{{ url_for('api.me.rejectfr') }}", {
+        fetch("{{ url_for('locked.me.rejectfr') }}", {
             method: 'POST',
             body: fd
         }).then(function(res) {
@@ -163,7 +164,7 @@
         fd = new FormData()
         fd.append('token', token)
         fd.append('cancelation', el.parentElement.parentElement.id)
-        fetch("{{ url_for('api.me.cancelfr') }}", {
+        fetch("{{ url_for('locked.me.cancelfr') }}", {
             method: 'POST',
             body: fd
         }).then(function(res) {

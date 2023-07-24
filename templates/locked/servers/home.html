@@ -17,6 +17,15 @@
         left:50%;
         transform: translate(-50%, -50%);
     }
+
+    #main-home a {
+        color: var(--text-color);
+        transition: color 100ms ease-out 50ms;
+    }
+
+    #main-home a:hover {
+        color: #6ebeff;
+    }
 </style>
 {% endblock %}
 
@@ -26,6 +35,6 @@
     <h1 style='margin-bottom:0; margin-top:16px;'>{{ servername }}</h1>
     <p style="word-break:break-all;{% if server.description|length <= 0 %}margin:0;{% else %}margin-bottom:0;{% endif %}">{{ server['description'] }}</p>
     <p>{{ server['welcome_message'] }}</p>
-    <a href="/servers/{{ sid }}/members" style="color: var(--text-color);">See all members</a>
+    <a href="/servers/{{ sid }}/members">See all members</a>
 </div>
 {% endblock %}

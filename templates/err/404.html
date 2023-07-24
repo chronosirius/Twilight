@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html translate="no">
     <head>
         <title>404 Page Not Found | DisDatCord</title>
@@ -12,21 +13,116 @@
                 text-align: center;
                 color: white;
                 background: #343434;
+                margin: 0;
+                width: 100vw;
+                height: 100vh;
+                position: absolute;
+                top: 0;
+                left: 0;
             }
 
             button {
+                cursor: pointer;
+                transform: none;
+                transition: all 100ms ease-out 50ms;
+                will-change: transform;
+                -webkit-font-smoothing: subpixel-antialiased;
+            }
+
+            button:hover {
+                transform: perspective(1px) translateY(-1px) translate3d(0,0,0);
+                box-shadow: 0px 2px 5px black;
+            }
+
+            #pnf button {
                 border-radius: 25px;
-                background: blue;
+                background: #52a5e9;
                 height: 3em;
                 width: 8em;
-                color: white;
                 cursor: pointer;
+                border: 2px solid #52a5e9;
+            }
+            #banner {
+                position: absolute;
+                top: 0;
+                width: 100%;
+                height: 10%;
+                background-color: #232323;
+                display: block;
+            }
+
+            #banner p {
+                position: absolute;
+                left: calc(20% + 10px);
+                top: 25%;
+                height: 50%;
+                margin: 0;
+            }
+
+            #banner a {
+                text-decoration: underline;
+                cursor: pointer;
+                color: white;
+                font-size: 25px;
+                transition: color 100ms ease-out 50ms;
+            }
+
+            #banner a:hover {
+                color: #52a5e9;
+            }
+
+            #banner img {
+                position: absolute;
+                height: 9vh;
+                padding: .5vh;
+                border-radius: 40% / 40%;
+                left: 0;
+                margin-left: 10%;
+            }
+
+
+            #banner button {
+                position: absolute;
+                right: 10%;
+                top: 22.5%;
+                width: 6.5em;
+                background-color: rgb(200, 200, 200);
+                border: none;
+                height: 55%;
+                border-radius: 40px / 40px;
+
+            }
+
+            #pnf {
+                margin-top: 7.5%;
+                width: 100vw;
             }
         </style>
     </head>
     <body>
-        <h1>Page Not Found</h1>
-        <p>That page was not found.</p>
-        <button onclick="history.back()">Go Back</button>
+        <div id="banner">
+            <img src='/favicon.ico'>
+            <p><a href='/'>{{ appname }}</a></p>
+            <button>------</button>
+        </div>
+        <div id="pnf">
+            <h1>Page Not Found</h1>
+            <p>That page was not found.</p>
+            <button onclick="history.back()">Go Back</button>
+        </div>
+        <script defer>
+        function check() {
+            var button = document.querySelector('#banner button')
+            if (Object.fromEntries(new URLSearchParams(document.cookie.replace(/; /g, "&"))).hasOwnProperty('authtoken')) {
+                button.innerText = "Account"
+                button.onclick = () => {location = '/me/'}
+            } else {
+                button.innerText = "Login"
+                button.onclick = () => {location = '/account/login'}
+            }
+            button.style.cursor = 'pointer'
+        }
+        check()
+        </script>
     </body>
 </html>

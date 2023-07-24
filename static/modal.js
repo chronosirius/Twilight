@@ -17,7 +17,7 @@ class Modal {
         this._inputs = {}
         this.modal = document.createElement('div')
         this.modal.id = "_modal-" + custom_id
-        this.modal.style = 'position: fixed; width: 33%; left: 33%; height: 70%; top: 15%; color: black; background-color: white; z-index: 1001; text-align: center;'
+        this.modal.style = 'position: fixed; width: 33%; left: 33%; height: 70%; top: 15%; color: black; background-color: white; z-index: 1001; text-align: center; transition: transform 250ms ease; transform: scale(0);'
         let h = document.createElement('h1')
         h.innerHTML = header
         this.modal.appendChild(h)
@@ -117,12 +117,24 @@ class Modal {
 
     show() {
         document.body.appendChild(this.modal)
-        document.getElementById(this.modal.id).classList.toggle('zoomin')
-        document.body.appendChild(BACKDROP.cloneNode(true))
+        var self = this
+        setTimeout(function() {
+            console.log('settimeeout')
+            document.getElementById(self.modal.id).style.transform = 'scale(1)'
+            document.body.appendChild(BACKDROP.cloneNode(true))
+        }, 0)
     }
 
     close() {
+        let o = this.modal.querySelectorAll('input[type=text]')
+        for (let i=0;i<o.length;i++) {
+            o[i].value = o[i].defaultValue
+        }
+        document.getElementById(this.modal.id).style.transform = 'scale(0)'
         document.getElementById(BACKDROP.id).remove()
-        document.getElementById(this.modal.id).remove()
+        var self = this;
+        setTimeout(function() {
+            document.getElementById(self.modal.id).remove()
+        }, 250)
     }
 }

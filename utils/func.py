@@ -6,6 +6,10 @@ from os import getpid, getppid
 def generate_token() -> str:
     return hex((round(datetime.utcnow().timestamp()*1000) + randint(0, 9_999_999_999_999_999))*(getpid()*getppid() + randint(0, 999_999))).lstrip('0x').upper()
 
+def snowflake():
+    pass
+    
+
 def quickhash(string: str) -> str:
     a = new('sha512')
     a.update(string.encode())
@@ -80,3 +84,10 @@ def expose(dict_: dict, keeplist: list, negate: bool = False):
         if xor(k in keeplist, negate):
             d[k] = dict_[k]
     return d
+
+def getsame(l1, l2):
+    p = []
+    for i in l1:
+        if i in l2:
+            p.append(i)
+    return p

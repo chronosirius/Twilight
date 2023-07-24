@@ -41,7 +41,7 @@
             form.append('token', token)
             form.append('username', username)
             form.append('discriminator', discriminator)
-            fetch('{{ url_for("api.me.sendfr") }}', {
+            fetch('{{ url_for("locked.me.sendfr") }}', {
                 method: 'POST',
                 body: form
             }).then(function(res) {

@@ -47,6 +47,10 @@ def index():
 def favicon():
     return send_from_directory('.', 'favicon.ico')
 
+@app.route('/.well-known/pki-validation/3BF86315CB32D4D76A7A28018593400F.txt')
+def verif():
+    return send_from_directory('./ssl_verif', '3BF86315CB32D4D76A7A28018593400F.txt')
+
 @app.errorhandler(404)
 def not_found(err: NotFound):
     return render_template('err/404.html', error_path=request.path), 404
@@ -112,11 +116,13 @@ def load():
     from userauth import userauth_bp_proc
     from locked import locked_bp
     from cdn import cdn
+    from user_view import userbp
 
     app.register_blueprint(account_bp_views)
     app.register_blueprint(userauth_bp_proc)
     app.register_blueprint(locked_bp)
     app.register_blueprint(cdn)
+    app.register_blueprint(userbp)
 
 from websocket import wss
 def run():

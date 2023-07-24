@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="height=device-height,initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Ubuntu&family=Open+Sans&display=block");
+
+        * {
+            font-family: 'Ubuntu', sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-color: white;
+                --disc-color: #666;
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --text-color: black;
+                --disc-color: #777;
+            }
+        }
+
+        body {
+            margin: 0;
+            width: 100lvw;
+            height: 100lvh;
+        }
+        img#pfp {
+            width: 50%;
+            margin-left: 25%;
+            margin-right: 25%;
+            border-radius: 50%;
+            -webkit-user-drag: none;
+            user-select: none;
+        }
+        p {
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        #discriminator {
+            color: var(--disc-color);
+            display: none;
+        }
+
+        #discriminator.visible {
+            display: inline;
+        }
+
+        p:focus #discriminator {
+            display: inline;
+        }
+
+        #inputs {
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+    </style>
+</head>
+<body>
+    <img id="pfp" src="{{ user['pfp_url'] }}">
+    <p onclick="document.getElementById('discriminator').classList.toggle('visible')"><span id="username">{{ user.username }}</span><span id="discriminator">#{{ user.discriminator }}</span></p>
+
+    <div id="inputs">
+        {% if viewer != None %}
+        {% if viewer.id != user.id %}
+        {% if user.id in viewer.friends %}
+        <input type="text" placeholder="message" id="messagebox"> <button onclick="send()">Send Message</button>
+        <script>
+            document.getElementById('messagebox').addEventListener('keypress', function(ev) {
+                if (ev.keyCode == 13) {
+                    send()
+                }
+            })
+
+            function send() {
+                let message = document.getElementById('messagebox').value
+                if (message.trim() != "") {
+                    window.parent.postMessage({
+                        type: 'DM',
+                        recv: '{{ user.id }}',
+                        message: message
+                    })
+                } 
+            }
+        </script>
+        {%else%}
+        <button>Add friend</button>
+        {%endif%}
+        {% endif %}
+        {% else %}
+        <button>Login/Sign up</button>
+        {% endif %}
+    </div>
+</body>
+</html>

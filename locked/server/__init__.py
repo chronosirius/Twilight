@@ -139,7 +139,11 @@ def members(sid):
 
 @servers_bp.route('/<sid>/channels/<cid>')
 def channel(sid, cid):
-    if cid not in servers[sid]['channels'].keys(): #type: ignore
+    print(servers[sid]['channels'])
+    cids = []
+    for cat in servers[sid]['channels']:
+        cids.extend(servers[sid]['channels'][cat].keys())
+    if cid not in cids: #type: ignore
         abort(404)
     return rt('locked/servers/channel.html', 
 

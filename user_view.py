@@ -1,9 +1,11 @@
-from flask import Blueprint, request, render_template, flash, redirect, url_for, g
+from flask import Blueprint, abort, request, render_template, flash, redirect, url_for, g
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from os import environ as env
 from main import users, security
+from utils.func import getsame
 
-userbp = Blueprint("user", __name__.split('.')[0])
+
+userbp = Blueprint("user", __name__.split('.')[0], url_prefix='/user/')
 
 @userbp.before_request
 def check_authorization():
@@ -55,6 +57,22 @@ def check_authorization():
 @userbp.route('/<uid>')
 def user(uid):
     if uid in users.keys():
-        if request.headers.get('X-TWILIGHT-Is-Iframe'):
-            
-            return render_template('iframe/user.html', user=users[uid])
+        if request.args.get('iframe'):
+            match users[uid]['privacy']:
+                case 0: #friends and server members only
+                    if g.user == 'anonymous': 
+                        return redirect(url_for('accounts.login'))
+                    if len(getsame([server['id'] for server in g.user['servers']], [server['id'] for server in users[uid]['servers']])) > 0:
+                        return render_template('iframe/user.html', user=users[uid], viewer=g.user, friend=(uid in g.user['friends']))
+                case 1: #user must be logged in
+                    if g.user == 'anonymous':
+                        return redirect(url_for('accounts.login'))
+                    return render_template('iframe/user.html', user=users[uid], viewer=g.user, friend=False)
+                case 2: #anyone
+                    return render_template('iframe/user.html', user=users[uid], viewer=(g.user if g.user !='anonymous' else None), friend=False)
+                case _:
+                    return ""
+        else:
+            return ""
+    else:
+        abort(404)

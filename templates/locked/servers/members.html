@@ -60,41 +60,20 @@
                 fr.id = 'member-view-controls'
                 fr.setAttribute('viewing', uid)
                 fr.style = 'position: absolute; right: 0; height: 100%; top:0; border: none; border-left: revert;width:50%;'
+                
                 document.querySelector('#subsubbody').appendChild(fr)
                 document.querySelector('#memberplace').style.width = '50%'
                 Array.from(document.querySelectorAll('.member:not(.iframe-open)')).forEach(function(el) {
                     el.classList.toggle('iframe-open')
                 })
-                let b = new Blob(['<html><head><style>@media (prefers-color-scheme: light){:root{--text-color:black;--bg-color:white;}} @media (prefers-color-scheme:dark){:root{--text-color:white;--bg-color:#232323}} body{color:var(--text-color); background-color: var(--bg-color);}</style></head><body>Loading, please wait...</body></html>'], {type: 'text/html'})
-                let k = URL.createObjectURL(b)
-                fr.src = k
-                const headers = new Headers()
-                headers.set('X-TWILIGHT-Is-iFrame', '1')
-                fetch(`${location.origin}/user/${uid}`, {
-                    headers: headers
-                }).then(function(res) {
-                    return res.blob()
-                }).then(function(blob) {
-                    u = URL.createObjectURL(blob)
-                    fr.src = u
-                })
+                fr.src = `/user/${uid}?iframe=1`
             } else {
                 console.log('exists')
                 let fr = document.getElementById('member-view-controls')
                 if (fr.getAttribute('viewing') != uid) {
                     console.log('not same')
-                    const headers = new Headers()
-                    headers.set('X-TWILIGHT-Is-iFrame', '1')
-                    fetch(`${location.origin}/user/${uid}`, {
-                        headers: headers
-                    }).then(function(res) {
-                        return res.blob()
-                    }).then(function(blob) {
-                        URL.revokeObjectURL(u)
-                        u = URL.createObjectURL(blob)
-                        fr.src = u
-                        fr.setAttribute('viewing', uid)
-                    })
+                    fr.setAttribute('viewing', uid)
+                    fr.src = `/user/${uid}?iframe=1`
                 } else {
                     console.log('same')
                     fr.remove()
@@ -106,6 +85,10 @@
                 }
             }
         })
+    })
+
+    window.addEventListener('message', function(event) {
+        console.log(event)
     })
 </script>
 {% endblock %}
