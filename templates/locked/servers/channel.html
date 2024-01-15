@@ -8,25 +8,36 @@
         top:0;
         left:0;
         width: 100%;
-        height: 95%;
+        height: 90%;
     }
 
     div#messagebox-wrapper {
+        position: relative;
+        height: 10%;
+        top: 90%;
+    }
+
+    div#messagebox-wrapper-visible {
         background-color: var(--spec-el-color);
         position: absolute;
-        bottom: 1.5%;
+        bottom: 15%;
         left: 2.5%;
         width: 95%;
-        min-height: 7%;
+        min-height: 70%;
+        height: max-content;
         border-radius: 15px / 15px;
     }
 
-    textarea#messagebox {
+    span#messagebox {
         position: absolute;
         outline: none;
+        padding: none;
+        border: none;
+        margin: 0;
         top: 25%;
+        bottom: 25%;
         left: 2.5%;
-        min-height: 50%;
+        height: 50%;
         width: 95%;
         resize: none;
     }
@@ -48,11 +59,33 @@
 
 </div>
 <div id="messagebox-wrapper">
-    <textarea id='messagebox'></textarea>
+    <div id="messagebox-wrapper-visible">
+        <span id="messagebox" contenteditable></span>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+let mbox = document.querySelector('#messagebox-wrapper')
+function isOverflown(element) {
+  return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+}
+
+mbox.addEventListener('paste', function(e) {
+    e.preventDefault()
+    mbox.querySelector('#messagebox').innerHTML += e.clipboardData.getData('text')
+})
+
+setInterval(function() {
+    console.log('e')
+    if (isOverflown(mbox)) {
+        handleMessageBoxOverflow()
+    }
+}, 100)
+
+function handleMessageBoxOverflow() {
+    
+}
 </script>
 {% endblock %}
